@@ -1,6 +1,8 @@
 package workers
 
-import "fmt"
+import (
+	"github.com/rs/zerolog/log"
+)
 
 // WorkerPool dispatch jobs to a pool of workers
 type WorkerPool struct {
@@ -14,17 +16,17 @@ type WorkerPool struct {
 }
 
 // NewWorkerPool return a WorkerPool to process jobs
-func NewWorkerPool(workerCount int, cancel chan struct{}) WorkerPool {
+func NewWorkerPool(workerCount int, cancel chan struct{}) *WorkerPool {
   workers := []*Worker{}
   workerQueue := make(chan chan Job, workerCount)
 
 	for i := 0; i < workerCount; i++ {
-		fmt.Println("Starting worker", i+1)
+    log.Info().Msgf("Initialising worker %d", i+1)
 		worker := NewWorker(i+1, workerQueue, cancel)
     workers = append(workers, worker)
 	}
 
-  return WorkerPool{
+  return &WorkerPool{
     JobQueue: make(chan Job, 100),
 	  WorkerQueue: workerQueue,
     Workers: workers,
@@ -34,7 +36,9 @@ func NewWorkerPool(workerCount int, cancel chan struct{}) WorkerPool {
 // Start the worker pool
 func (wp *WorkerPool) Start() {
   for _, worker := range wp.Workers {
-		fmt.Println("Starting worker", worker.ID)
+    log.Info().
+      Int("worker", worker.ID).
+      Msg("Starting worker")
     worker.Start()
   }
 
@@ -42,10 +46,8 @@ func (wp *WorkerPool) Start() {
 		for {
 			select {
 			case job := <-wp.JobQueue:
-				fmt.Println("Received job", job.Repository)
 				go func() {
 					worker := <-wp.WorkerQueue
-					fmt.Println("Processing job request")
 					worker <- job
 				}()
 			}

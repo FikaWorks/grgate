@@ -1,7 +1,7 @@
 package workers
 
 import (
-	"fmt"
+	"github.com/rs/zerolog/log"
 )
 
 // Worker process jobs from a queue
@@ -30,11 +30,19 @@ func (w *Worker) Start() {
 
 			select {
 			case work := <-w.Job:
-				fmt.Printf("[worker #%d] received work request %s\n", w.ID, work.Repository)
+        log.Debug().
+          Int("worker", w.ID).
+          Str("repository", work.Repository).
+          Msg("Processing work item from queue")
 				work.Process()
-				fmt.Printf("[worker #%d] finished work for %s\n", w.ID, work.Repository)
+        log.Debug().
+          Int("worker", w.ID).
+          Str("repository", work.Repository).
+          Msg("Completed work from queue")
 			case <-w.Cancel:
-				fmt.Printf("[worker #%d]: stopping\n", w.ID)
+        log.Info().
+          Int("worker", w.ID).
+          Msg("Stopping worker queue")
 				return
 			}
 		}

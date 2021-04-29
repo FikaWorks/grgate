@@ -19,6 +19,7 @@ type Platform interface {
 type Release struct {
   CommitSha string
   ID int64
+  Name string
   Platform string
   Tag string
 }

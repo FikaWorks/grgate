@@ -37,11 +37,22 @@ func NewJob(platform platforms.Platform, owner, repository string) (job Job, err
 
 // Process job
 func (j *Job) Process() error {
-	log.Info().Msgf("Processing %s/%s", j.Owner, j.Repository)
-
-  log.Info().Msgf("Dry run: %t", j.Config.Enabled)
-  log.Info().Msgf("Matching statuses: %s", strings.Join(j.Config.Statuses, ", "))
-  log.Info().Msgf("Matching tag regexp: %s", j.Config.TagRegexp)
+	log.Info().
+    Str("repository", j.Repository).
+    Str("owner", j.Owner).
+    Msgf("Processing")
+  log.Info().
+    Str("repository", j.Repository).
+    Str("owner", j.Owner).
+    Msgf("Dry run: %t", j.Config.Enabled)
+  log.Info().
+    Str("repository", j.Repository).
+    Str("owner", j.Owner).
+    Msgf("Matching statuses: %s", strings.Join(j.Config.Statuses, ", "))
+  log.Info().
+    Str("repository", j.Repository).
+    Str("owner", j.Owner).
+    Msgf("Matching tag regexp: %s", j.Config.TagRegexp)
 
   tagRegexp, err := regexp.Compile(j.Config.TagRegexp)
   if err != nil {
@@ -55,17 +66,26 @@ func (j *Job) Process() error {
       j.Repository, err.Error())
   }
 
-  log.Info().Msgf("Found %d release(s) marked as draft", len(releaseList))
+  log.Info().
+    Str("repository", j.Repository).
+    Str("owner", j.Owner).
+    Msgf("Found %d release(s) marked as draft", len(releaseList))
 
   for _, release := range releaseList {
-    if tagRegexp.MatchString(release.Tag) {
-      log.Debug().Msgf("Release %s do not match target tag %s", release.Tag,
-        j.Config.TagRegexp)
+    if ! tagRegexp.MatchString(release.Tag) {
+      log.Debug().
+        Str("repository", j.Repository).
+        Str("owner", j.Owner).
+        Msgf("Release %s do not match target tag %s", release.Tag,
+          j.Config.TagRegexp)
       continue
     }
 
-    log.Info().Msgf("Release %s match target tag %s", release.Tag,
-      j.Config.TagRegexp)
+    log.Debug().
+      Str("repository", j.Repository).
+      Str("owner", j.Owner).
+      Msgf("Release %s match target tag %s", release.Tag,
+        j.Config.TagRegexp)
 
     succeeded, err := j.Platform.HasAllStatusSucceeded(j.Owner,
       j.Repository, release.CommitSha, j.Config.Statuses)
@@ -73,24 +93,36 @@ func (j *Job) Process() error {
       return fmt.Errorf("couldn't check all status check: %s", err.Error())
     }
 
-    log.Info().Msgf("Release %s @ %s passed all tests: %t", release.Tag,
-      release.CommitSha, succeeded)
+    log.Debug().
+      Str("repository", j.Repository).
+      Str("owner", j.Owner).
+      Msgf("Release %s @ %s passed all tests: %t", release.Tag,
+        release.CommitSha, succeeded)
 
     if succeeded {
       if !j.Config.Enabled {
-        log.Info().Msgf("Would publish release %s with tag %s and commit %s",
-          release.Tag, release.Tag, release.CommitSha)
+        log.Info().
+          Str("repository", j.Repository).
+          Str("owner", j.Owner).
+          Msgf("Would publish release %s with tag %s@%s",
+            release.Name, release.Tag, release.CommitSha)
         continue
       }
 
-      log.Info().Msgf("All status succeeded, publishing release with tag %s and commit %s",
+      log.Info().
+        Str("repository", j.Repository).
+        Str("owner", j.Owner).
+        Msgf("All status succeeded, publishing release with tag %s and commit %s",
           release.Tag, release.CommitSha)
       _, err := j.Platform.PublishRelease(j.Owner, j.Repository, release.ID)
       if err != nil {
         return fmt.Errorf("couldn't publish release: %s", err.Error())
       }
 
-      log.Info().Msgf("Successfully published release with tag %s and commit %s",
+      log.Info().
+        Str("repository", j.Repository).
+        Str("owner", j.Owner).
+        Msgf("Successfully published release with tag %s and commit %s",
           release.Tag, release.CommitSha)
     }
   }

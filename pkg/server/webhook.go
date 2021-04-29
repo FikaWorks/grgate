@@ -11,14 +11,16 @@ import (
 )
 
 type WebhookHandler struct {
-  WebhookSecret string
+  JobQueue chan workers.Job
   Platform platforms.Platform
+  WebhookSecret string
 }
 
-func NewWebhookHandler(platform platforms.Platform, webhookSecret string) *WebhookHandler {
+func NewWebhookHandler(platform platforms.Platform, webhookSecret string, jobQueue chan workers.Job) *WebhookHandler {
   return &WebhookHandler{
-    WebhookSecret: webhookSecret,
     Platform: platform,
+    WebhookSecret: webhookSecret,
+    JobQueue: jobQueue,
   }
 }
 
@@ -38,18 +40,69 @@ func (h *WebhookHandler) GithubHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch e := event.(type) {
+  case *github.StatusEvent:
+    log.Debug().Msgf("Received webhook event %s for %s/%s",
+        "StatusEvent", *e.Repo.Owner.Login, *e.Repo.Name)
+    h.processStatusEvent(*event.(*github.StatusEvent))
+  case *github.CheckSuiteEvent:
+    log.Debug().Msgf("Received webhook event %s for %s/%s",
+        "CheckSuiteEvent", *e.Repo.Owner.Login, *e.Repo.Name)
+    h.processCheckSuiteEvent(*event.(*github.CheckSuiteEvent))
 	case *github.CheckRunEvent:
-    // https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads#check_run
-    if e.Action != nil && *e.Action == "completed" {
-      job, err := workers.NewJob(h.Platform, *e.Repo.Owner.Login, *e.Repo.Name)
-      if err != nil {
-		    log.Error().Err(err).Msgf("Could create job for %s/%s from event %s",
-           *e.Repo.Owner.Login, *e.Repo.Name, *e.Action)
-      }
-      job.Process()
-    }
+    log.Debug().Msgf("Received webhook event %s for %s/%s",
+        "CheckRunEvent", *e.Repo.Owner.Login, *e.Repo.Name)
+    h.processCheckRunEvent(*event.(*github.CheckRunEvent))
+
 	default:
 		log.Info().Msgf("Unknown event type %s", github.WebHookType(r))
 		return
 	}
+}
+
+func (h *WebhookHandler) processStatusEvent(event github.StatusEvent) {
+  if event.State != nil && *event.State == "success" {
+    log.Debug().Msgf("Creating new job for %s/%s", *event.Repo.Owner.Login,
+      *event.Repo.Name)
+
+    job, err := workers.NewJob(h.Platform, *event.Repo.Owner.Login,
+      *event.Repo.Name)
+    if err != nil {
+      log.Error().Err(err).Msgf("Could create job for %s/%s from event %s",
+          *event.Repo.Owner.Login, *event.Repo.Name, *event.State)
+    }
+
+    h.JobQueue <- job
+  }
+}
+
+func (h *WebhookHandler) processCheckSuiteEvent(event github.CheckSuiteEvent) {
+  if event.Action != nil && *event.Action == "completed" {
+    log.Debug().Msgf("Creating new job for %s/%s", *event.Repo.Owner.Login,
+      *event.Repo.Name)
+
+    job, err := workers.NewJob(h.Platform, *event.Repo.Owner.Login,
+      *event.Repo.Name)
+    if err != nil {
+      log.Error().Err(err).Msgf("Could create job for %s/%s from event %s",
+          *event.Repo.Owner.Login, *event.Repo.Name, *event.Action)
+    }
+
+    h.JobQueue <- job
+  }
+}
+
+func (h *WebhookHandler) processCheckRunEvent(event github.CheckRunEvent) {
+  if event.Action != nil && *event.Action == "completed" {
+    log.Debug().Msgf("Creating new job for %s/%s", *event.Repo.Owner.Login,
+      *event.Repo.Name)
+
+    job, err := workers.NewJob(h.Platform, *event.Repo.Owner.Login,
+      *event.Repo.Name)
+    if err != nil {
+      log.Error().Err(err).Msgf("Could create job for %s/%s from event %s",
+          *event.Repo.Owner.Login, *event.Repo.Name, *event.Action)
+    }
+
+    h.JobQueue <- job
+  }
 }

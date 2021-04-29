@@ -17,6 +17,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/fikaworks/ggate/pkg/platforms"
+	"github.com/fikaworks/ggate/pkg/workers"
 )
 
 var (
@@ -25,34 +26,31 @@ var (
 
 type ServerConfig struct {
   ListenAddr string
+  Logger zerolog.Logger
   MetricsAddr string
-  ProbeAddr string
   Platform platforms.Platform
+  ProbeAddr string
   WebhookSecret string
+  Workers int
 }
 
 type Server struct {
+  CancelWorker chan struct{}
   Config *ServerConfig
   Srv *http.Server
-}
-
-func init() {
-	// prometheus.MustRegister(inFlightGauge, counter, duration, responseSize)
-	version = os.Getenv("VERSION")
+  WorkerPool *workers.WorkerPool
 }
 
 func NewServer(config *ServerConfig) *Server {
-	// init log
-	log := zerolog.New(os.Stdout).With().
-		Timestamp().
-		Str("version", version).
-		Logger()
-
 	// router
 	r := mux.NewRouter()
-	c := alice.New(hlog.NewHandler(log), hlog.AccessHandler(Logger))
+	c := alice.New(hlog.NewHandler(config.Logger), hlog.AccessHandler(Logger))
 
-  webhook := NewWebhookHandler(config.Platform, config.WebhookSecret)
+  cancelWorker := make(chan struct{})
+  workerPool := workers.NewWorkerPool(config.Workers, cancelWorker)
+
+  webhook := NewWebhookHandler(config.Platform, config.WebhookSecret,
+    workerPool.JobQueue)
   r.HandleFunc("/github/webhook", webhook.GithubHandler).Methods("POST")
 
 	srv := &http.Server{
@@ -63,7 +61,13 @@ func NewServer(config *ServerConfig) *Server {
   return &Server{
     Config: config,
     Srv: srv,
+    WorkerPool: workerPool,
+    CancelWorker: cancelWorker,
   }
+}
+
+func (s *Server) startWorkerPool() {
+  s.WorkerPool.Start()
 }
 
 func (s *Server) Start() {
@@ -71,11 +75,15 @@ func (s *Server) Start() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 
+	go s.startWorkerPool()
 	go s.serveMetrics()
 	go s.serveHTTP()
 	go s.serveProbe()
 
 	<-quit
+
+	log.Info().Msg("Shutting down worker pool...")
+  close(s.CancelWorker)
 
 	log.Info().Msg("Shutting down server...")
 

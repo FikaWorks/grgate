@@ -58,6 +58,7 @@ func (p *githubPlatform) ListReleases(owner, repository string) (releases []*Rel
 	for _, release := range releaseList {
 		id := *release.ID
 		tag := *release.TagName
+		name := *release.Name
 		commit := *release.TargetCommitish
 
 		// TODO: if target commitish is branch, then get lastest commit from branch
@@ -65,6 +66,7 @@ func (p *githubPlatform) ListReleases(owner, repository string) (releases []*Rel
 			releases = append(releases, &Release{
 				ID:        id,
 				CommitSha: commit,
+				Name:      name,
 				Tag:       tag,
 				Platform:  "github",
 			})

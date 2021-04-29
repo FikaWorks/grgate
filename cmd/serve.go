@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/rs/zerolog/log"
 
 	"github.com/fikaworks/ggate/pkg/server"
 	"github.com/fikaworks/ggate/pkg/config"
@@ -34,6 +35,8 @@ functionnalities:
       Platform: platform,
       ProbeAddr: config.Main.Server.ProbeAddress,
       WebhookSecret: config.Main.Github.WebhookSecret,
+      Workers: config.Main.Workers,
+      Logger: log.Logger,
     })
     srv.Start()
 
