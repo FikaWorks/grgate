@@ -1,7 +1,6 @@
 package workers
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -11,7 +10,7 @@ import (
 	"github.com/fikaworks/ggate/pkg/config"
 )
 
-// Job
+// Job define information about the job to process
 type Job struct {
   Platform platforms.Platform
 	Owner string
@@ -20,13 +19,13 @@ type Job struct {
 }
 
 // NewJob return a Job to be processed by a worker
-func NewJob(platform platforms.Platform, owner, repository string) (job Job, err error) {
+func NewJob(platform platforms.Platform, owner, repository string) (job *Job, err error) {
   repoConfig, err := config.NewRepoConfig(platform, owner, repository)
   if err != nil {
     return
   }
 
-	job = Job{
+	job = &Job{
 		Platform: platform,
 		Owner: owner,
 		Repository: repository,
@@ -35,7 +34,8 @@ func NewJob(platform platforms.Platform, owner, repository string) (job Job, err
   return
 }
 
-// Process job
+// Process job by getting all the draft/unpublished releases, for each release
+// check that all the required status succeeded then publish the release
 func (j *Job) Process() error {
 	log.Info().
     Str("repository", j.Repository).
@@ -56,14 +56,22 @@ func (j *Job) Process() error {
 
   tagRegexp, err := regexp.Compile(j.Config.TagRegexp)
   if err != nil {
-    return fmt.Errorf("couldn't compile regexp \"%s\": %s",
-      j.Config.TagRegexp, err.Error())
+    log.Error().
+      Err(err).
+      Str("owner", j.Owner).
+      Str("repository", j.Repository).
+      Msgf("Couldn't compile regexp \"%s\"", j.Config.TagRegexp)
+    return err
   }
 
   releaseList, err := j.Platform.ListReleases(j.Owner, j.Repository)
   if err != nil {
-    return fmt.Errorf("couldn't list releases from %s/%s: %s", j.Owner,
-      j.Repository, err.Error())
+    log.Error().
+      Err(err).
+      Str("owner", j.Owner).
+      Str("repository", j.Repository).
+      Msg("Couldn't list releases")
+    return err
   }
 
   log.Info().
@@ -76,54 +84,77 @@ func (j *Job) Process() error {
       log.Debug().
         Str("repository", j.Repository).
         Str("owner", j.Owner).
-        Msgf("Release %s do not match target tag %s", release.Tag,
-          j.Config.TagRegexp)
+        Str("releaseCommit", release.CommitSha).
+        Str("releaseTag", release.Tag).
+        Str("releaseName", release.Name).
+        Msgf("Release do not match provided target tag %s", j.Config.TagRegexp)
       continue
     }
 
     log.Debug().
       Str("repository", j.Repository).
       Str("owner", j.Owner).
-      Msgf("Release %s match target tag %s", release.Tag,
-        j.Config.TagRegexp)
+      Str("releaseCommit", release.CommitSha).
+      Str("releaseTag", release.Tag).
+      Str("releaseName", release.Name).
+      Msgf("Release match provided target tag %s", j.Config.TagRegexp)
 
-    succeeded, err := j.Platform.HasAllStatusSucceeded(j.Owner,
+    succeeded, err := j.Platform.CheckAllStatusSucceeded(j.Owner,
       j.Repository, release.CommitSha, j.Config.Statuses)
     if err != nil {
-      return fmt.Errorf("couldn't check all status check: %s", err.Error())
+      log.Error().
+        Err(err).
+        Str("owner", j.Owner).
+        Str("repository", j.Repository).
+        Msg("Couldn't check all status check")
+      return err
     }
 
-    log.Debug().
+    log.Trace().
       Str("repository", j.Repository).
       Str("owner", j.Owner).
-      Msgf("Release %s @ %s passed all tests: %t", release.Tag,
-        release.CommitSha, succeeded)
+      Str("releaseCommit", release.CommitSha).
+      Str("releaseTag", release.Tag).
+      Str("releaseName", release.Name).
+      Msgf("CheckAllStatusSucceeded: %t", succeeded)
 
     if succeeded {
       if !j.Config.Enabled {
         log.Info().
           Str("repository", j.Repository).
           Str("owner", j.Owner).
-          Msgf("Would publish release %s with tag %s@%s",
-            release.Name, release.Tag, release.CommitSha)
+          Str("releaseCommit", release.CommitSha).
+          Str("releaseTag", release.Tag).
+          Str("releaseName", release.Name).
+          Msgf("All required status succeeded, would publish release [dry-run]")
         continue
       }
 
-      log.Info().
+      log.Debug().
         Str("repository", j.Repository).
         Str("owner", j.Owner).
-        Msgf("All status succeeded, publishing release with tag %s and commit %s",
-          release.Tag, release.CommitSha)
+        Str("releaseCommit", release.CommitSha).
+        Str("releaseTag", release.Tag).
+        Str("releaseName", release.Name).
+        Msg("All required status succeeded, publishing release...")
+
       _, err := j.Platform.PublishRelease(j.Owner, j.Repository, release.ID)
       if err != nil {
-        return fmt.Errorf("couldn't publish release: %s", err.Error())
+        log.Error().
+          Err(err).
+          Str("owner", j.Owner).
+          Str("repository", j.Repository).
+          Msg("Couldn't publish release")
+        return err
       }
 
       log.Info().
         Str("repository", j.Repository).
         Str("owner", j.Owner).
-        Msgf("Successfully published release with tag %s and commit %s",
-          release.Tag, release.CommitSha)
+        Str("releaseCommit", release.CommitSha).
+        Str("releaseTag", release.Tag).
+        Str("releaseName", release.Name).
+        Msg("Successfully published release")
     }
   }
 

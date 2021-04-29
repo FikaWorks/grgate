@@ -8,7 +8,7 @@ import (
 type Platform interface {
   CreateStatus(string, string, *Status) (error)
   GetStatus(string, string, string, string) (*Status, error)
-  HasAllStatusSucceeded(string, string, string, []string) (bool, error)
+  CheckAllStatusSucceeded(string, string, string, []string) (bool, error)
   ListStatus(string, string, string) ([]*Status, error)
   ListReleases(string, string) ([]*Release, error)
   PublishRelease(string, string, int64) (bool, error)

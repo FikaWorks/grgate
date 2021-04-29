@@ -8,17 +8,17 @@ import (
 type WorkerPool struct {
 
   // Job queue
-  JobQueue chan Job
+  JobQueue chan *Job
 
   // WorkerQueue is the job queue of a worker
-  WorkerQueue chan chan Job
+  WorkerQueue chan chan *Job
   Workers []*Worker
 }
 
 // NewWorkerPool return a WorkerPool to process jobs
 func NewWorkerPool(workerCount int, cancel chan struct{}) *WorkerPool {
   workers := []*Worker{}
-  workerQueue := make(chan chan Job, workerCount)
+  workerQueue := make(chan chan *Job, workerCount)
 
 	for i := 0; i < workerCount; i++ {
     log.Info().Msgf("Initialising worker %d", i+1)
@@ -27,7 +27,7 @@ func NewWorkerPool(workerCount int, cancel chan struct{}) *WorkerPool {
 	}
 
   return &WorkerPool{
-    JobQueue: make(chan Job, 100),
+    JobQueue: make(chan *Job, 100),
 	  WorkerQueue: workerQueue,
     Workers: workers,
   }

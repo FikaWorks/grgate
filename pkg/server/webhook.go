@@ -11,12 +11,12 @@ import (
 )
 
 type WebhookHandler struct {
-  JobQueue chan workers.Job
+  JobQueue chan *workers.Job
   Platform platforms.Platform
   WebhookSecret string
 }
 
-func NewWebhookHandler(platform platforms.Platform, webhookSecret string, jobQueue chan workers.Job) *WebhookHandler {
+func NewWebhookHandler(platform platforms.Platform, webhookSecret string, jobQueue chan *workers.Job) *WebhookHandler {
   return &WebhookHandler{
     Platform: platform,
     WebhookSecret: webhookSecret,

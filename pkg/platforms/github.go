@@ -90,7 +90,7 @@ func (p *githubPlatform) PublishRelease(owner, repository string, id int64) (pub
 	return
 }
 
-func (p *githubPlatform) HasAllStatusSucceeded(owner, repository, commitSha string, statusNameList []string) (succeeded bool, err error) {
+func (p *githubPlatform) CheckAllStatusSucceeded(owner, repository, commitSha string, statusNameList []string) (succeeded bool, err error) {
 	if len(statusNameList) == 0 {
 		return
 	}
