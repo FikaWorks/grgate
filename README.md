@@ -10,7 +10,11 @@ will in a near future.
 
 ## Overview
 
-TODO: diagram
+GGate is a CLI which can run a server and listen to Git webhook. When a release
+is published as draft, GGate will wait for all the status check attached to the
+the commit target of the release to succeed before merging it.
+
+![GGate Overview](ggate-overview.png)
 
 ## Getting started
 
