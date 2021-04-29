@@ -30,14 +30,14 @@ $ ggate serve
 
 # list status for a given commit in the FikaWorks/ggate repository
 $ ggate status list FikaWorks/ggate \
-		--commit 93431f42d5a5abc2bb6703fc723b162a9d2f20c3
+    --commit 93431f42d5a5abc2bb6703fc723b162a9d2f20c3
 
 # set status of given commit
 $ ggate status set FikaWorks/ggate \
-		--commit 93431f42d5a5abc2bb6703fc723b162a9d2f20c3 \
-		--name e2e-happyflow \
-		--status completed \
-		--state success
+    --commit 93431f42d5a5abc2bb6703fc723b162a9d2f20c3 \
+    --name e2e-happyflow \
+    --status completed \
+    --state success
 ```
 
 ## Config reference
@@ -51,12 +51,12 @@ default it will try to read `~/.ggate.yaml` from the home directory.
 # global configuration, this is the default
 globals:
   # filter release by tag, the tag associated to the draft/unpublished releases
-	# must match the regular expression defined by tagRegexp, default: .*
+  # must match the regular expression defined by tagRegexp, default: .*
   tagRegexp: .*
 
-	# list of statuses, default: []
-	statuses:
-		- e2e happy flow
+  # list of statuses, default: []
+  statuses:
+    - e2e happy flow
 
 server:
   listenAddress: 0.0.0.0:8080
@@ -67,6 +67,12 @@ server:
 workers: 1
 
 # Github configuration
+# when creating the Github app, make sure to select the following webhook
+# events:
+#   - Check runs
+#   - Check suites
+#   - Releases
+#   - Statuses
 github:
   appID: 000000
   installationID: 00000000
