@@ -1,8 +1,9 @@
 package server
 
 import (
-  "net/http"
+	"net/http"
 
+	"github.com/fikaworks/ggate/pkg/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -20,7 +21,7 @@ var (
 			Name: "http_requests_total",
 			Help: "A counter for requests to the wrapped handler.",
 			ConstLabels: map[string]string{
-				"version": version,
+				"version": config.Version,
 			},
 		},
 		[]string{"code", "method"},
@@ -32,7 +33,7 @@ var (
 			Help:    "A histogram of latencies for requests.",
 			Buckets: []float64{.25, .5, 1, 2.5, 5, 10},
 			ConstLabels: map[string]string{
-				"version": version,
+				"version": config.Version,
 			},
 		},
 		[]string{"code", "method"},
@@ -44,7 +45,7 @@ var (
 			Help:    "A histogram of response sizes for requests.",
 			Buckets: []float64{200, 500, 900, 1500},
 			ConstLabels: map[string]string{
-				"version": version,
+				"version": config.Version,
 			},
 		},
 		[]string{"code", "method"},

@@ -9,10 +9,11 @@ DOCKER_IMAGE=fikaworks/ggate
 	build-docker \
 	lint \
 	test \
-	test-all \
-	vet
+	validate
 
-all: test-all build-binary
+all: \
+	validate \
+	build
 
 build-docker:
 	docker build \
@@ -22,16 +23,12 @@ build-docker:
 		-t $(DOCKER_IMAGE) .
 
 build:
-	go build -ldflags="-X 'github.com/fikaworks/ggate/cmd.Version=$(GGATE_VERSION)'" -a -o ggate .
+	go build -ldflags="-X 'github.com/fikaworks/ggate/pkg/config.Version=$(GGATE_VERSION)'" -a -o ggate .
 
-validate: vet lint test
+validate: lint test
 
 test:
 	go test -v -parallel=4 ./...
 
 lint:
-	@go get github.com/golang/lint/golint
-	go list ./... | xargs -n1 golint
-
-vet:
-	go vet ./...
+	golangci-lint run

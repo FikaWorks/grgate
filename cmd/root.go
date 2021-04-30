@@ -3,20 +3,15 @@ package cmd
 import (
 	"os"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
 
 	"github.com/fikaworks/ggate/pkg/config"
 )
 
 var (
-  cfgFile string
-  globalConfig *viper.Viper
-
-  // Version of GGate
-  Version string
+	cfgFile string
 )
 
 // rootCmd represents the root command
@@ -31,46 +26,51 @@ using Git webhook or directly from the CLI.`,
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "",
-    "config file (default is $HOME/.ggate.yaml)")
+	flags := rootCmd.PersistentFlags()
 
-	rootCmd.PersistentFlags().Int64("github.appID", 0, "Github App ID")
-	rootCmd.PersistentFlags().Int64("github.installationID", 0,
-    "Github Installation ID")
-	rootCmd.PersistentFlags().String("github.privateKeyPath", "",
-    "Github private key path")
-	rootCmd.PersistentFlags().String("github.webhookSecret", "",
-    "Github webhook secret")
-	rootCmd.PersistentFlags().String("logLevel", "info",
-    "Log level: trace, debug, info, warn, error, fatal or panic")
-	rootCmd.PersistentFlags().String("logFormat", "pretty",
-    "Log format: json or pretty")
+	flags.StringVarP(&cfgFile, "config", "c", "",
+		"config file (default is $HOME/.ggate.yaml)")
+
+	flags.Int64("github.appID", 0, "Github App ID")
+	flags.Int64("github.installationID", 0, "Github Installation ID")
+	flags.String("github.privateKeyPath", "", "Github private key path")
+	flags.String("github.webhookSecret", "", "Github webhook secret")
+	flags.String("logLevel", "info", "Log level: trace, debug, info, warn,"+
+		"error, fatal or panic")
+	flags.String("logFormat", "pretty", "Log format: json or pretty")
 }
 
 func initConfig() {
-  // read global config and override it with flags value
-  globalConfig, _ := config.NewGlobalConfig(cfgFile)
+	// read global config and override it with flags value
+	globalConfig, _ := config.NewGlobalConfig(cfgFile)
 
-  globalConfig.BindPFlags(rootCmd.PersistentFlags())
-  globalConfig.Unmarshal(&config.Main)
+	if err := globalConfig.BindPFlags(rootCmd.PersistentFlags()); err != nil {
+		log.Error().Err(err)
+		return
+	}
+
+	if err := globalConfig.Unmarshal(&config.Main); err != nil {
+		log.Error().Err(err)
+		return
+	}
 
 	// logs
-  logLevel, _ := zerolog.ParseLevel(config.Main.LogLevel)
-  zerolog.SetGlobalLevel(logLevel)
+	logLevel, _ := zerolog.ParseLevel(config.Main.LogLevel)
+	zerolog.SetGlobalLevel(logLevel)
 
-  if config.Main.LogFormat == "pretty" {
-    log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-  }
+	if config.Main.LogFormat == "pretty" {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
 
 	zerolog.New(os.Stdout).With().
 		Timestamp().
 		Logger()
 
-  // inform about which config file is being used
-  configFile := globalConfig.ConfigFileUsed()
-  if configFile != "" {
-    log.Info().Msgf("Using config file: %s", configFile)
-  }
+	// inform about which config file is being used
+	configFile := globalConfig.ConfigFileUsed()
+	if configFile != "" {
+		log.Info().Msgf("Using config file: %s", configFile)
+	}
 }
 
 // Execute adds all child commands to the root command and sets flags

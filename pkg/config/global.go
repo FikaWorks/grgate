@@ -13,24 +13,24 @@ func NewGlobalConfig(path string) (v *viper.Viper, err error) {
 		v.SetConfigFile(path)
 	} else {
 		v.AddConfigPath("/etc/ggate")
-    v.SetConfigName("config.yaml")
-    v.SetConfigType("yaml")
-  }
+		v.SetConfigName("config.yaml")
+		v.SetConfigType("yaml")
+	}
 
-  // Set defaults
-  v.SetDefault("server.listenAddress", "0.0.0.0:8080")
-  v.SetDefault("server.metricsAddress", "0.0.0.0:9101")
-  v.SetDefault("server.proveAddress", "0.0.0.0:8086")
-  v.SetDefault("workers", 5)
-  v.SetDefault("repoConfigPath", ".ggate.yaml")
-  v.SetDefault("globals.tagRegexp", ".*")
-  v.SetDefault("globals.enabled", true)
+	// Set defaults
+	v.SetDefault("server.listenAddress", "0.0.0.0:8080")
+	v.SetDefault("server.metricsAddress", "0.0.0.0:9101")
+	v.SetDefault("server.proveAddress", "0.0.0.0:8086")
+	v.SetDefault("workers", 5)
+	v.SetDefault("repoConfigPath", ".ggate.yaml")
+	v.SetDefault("globals.tagRegexp", ".*")
+	v.SetDefault("globals.enabled", true)
 
 	err = v.ReadInConfig()
-  if err != nil {
-    return
-  }
+	if err != nil {
+		return
+	}
 
-  err = v.Unmarshal(&Main)
+	err = v.Unmarshal(&Main)
 	return
 }

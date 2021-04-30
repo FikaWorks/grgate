@@ -159,8 +159,17 @@ $ make build-docker
 $ docker run --ti -p 8080:8080 fikaworks/ggate
 ```
 
-### Tests, lint, vet
+### Lint
+
+[golangci-lint](https://golangci-lint.run) is used to lint the project, make
+sure to have the binary installed on your machine.
 
 ```bash
-$ make validate
+$ make lint
+```
+
+### Tests
+
+```bash
+$ make test
 ```

@@ -1,8 +1,8 @@
 package server
 
 import (
-  "net/http"
-  "time"
+	"net/http"
+	"time"
 
 	"github.com/rs/zerolog/hlog"
 )
@@ -15,4 +15,3 @@ func Logger(r *http.Request, status, size int, dur time.Duration) {
 		Dur("duration_ms", dur).
 		Msg("request")
 }
-

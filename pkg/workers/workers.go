@@ -30,21 +30,23 @@ func (w *Worker) Start() {
 
 			select {
 			case work := <-w.Job:
-        log.Debug().
-          Int("worker", w.ID).
-          Str("owner", work.Owner).
-          Str("repository", work.Repository).
-          Msg("Processing work item from queue")
-				work.Process()
-        log.Debug().
-          Int("worker", w.ID).
-          Str("owner", work.Owner).
-          Str("repository", work.Repository).
-          Msg("Completed work from queue")
+				log.Debug().
+					Int("worker", w.ID).
+					Str("owner", work.Owner).
+					Str("repository", work.Repository).
+					Msg("Processing work item from queue")
+				if err := work.Process(); err != nil {
+					continue
+				}
+				log.Debug().
+					Int("worker", w.ID).
+					Str("owner", work.Owner).
+					Str("repository", work.Repository).
+					Msg("Completed work from queue")
 			case <-w.Cancel:
-        log.Info().
-          Int("worker", w.ID).
-          Msg("Stopping worker queue")
+				log.Info().
+					Int("worker", w.ID).
+					Msg("Stopping worker queue")
 				return
 			}
 		}

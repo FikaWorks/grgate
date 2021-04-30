@@ -24,7 +24,18 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: v1.39
     - name: validate
       run: make validate
     - name: build
       run: make build
+    # - name: Run GoReleaser
+    #   uses: goreleaser/goreleaser-action@v2
+    #   with:
+    #     version: latest
+    #     args: release --rm-dist
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
