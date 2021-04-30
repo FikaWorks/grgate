@@ -10,12 +10,14 @@ import (
 	"github.com/fikaworks/ggate/pkg/workers"
 )
 
+// WebhookHandler hold webhook configuration
 type WebhookHandler struct {
   JobQueue chan *workers.Job
   Platform platforms.Platform
   WebhookSecret string
 }
 
+// NewWebhookHandler returns an instance of WebhookHandler
 func NewWebhookHandler(platform platforms.Platform, webhookSecret string, jobQueue chan *workers.Job) *WebhookHandler {
   return &WebhookHandler{
     Platform: platform,
@@ -24,6 +26,7 @@ func NewWebhookHandler(platform platforms.Platform, webhookSecret string, jobQue
   }
 }
 
+// GithubHandler handle Github webhook requests
 func (h *WebhookHandler) GithubHandler(w http.ResponseWriter, r *http.Request) {
 	payload, err := github.ValidatePayload(r, []byte(h.WebhookSecret))
 	if err != nil {

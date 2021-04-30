@@ -12,7 +12,7 @@ will in a near future.
 
 GGate is a CLI which can run a server and listen to Git webhook. When a release
 is published as draft, GGate will wait for all the status check attached to the
-the commit target of the release to succeed before merging it.
+commit target of the release to succeed before merging it.
 
 ![GGate Overview](ggate-overview.png)
 
@@ -46,10 +46,17 @@ $ ggate status set FikaWorks/ggate \
 
 ## Config reference
 
-### Local CLI / Server
+GGate has 2 types of configuration:
+- **main config** which define global, server settings and credentials to talk
+to external API like Github
+- **repo config** which is a file stored in the repository and define the
+merging rule. Fields are inherited from `main.globals:`, so if you need to
+override a setting you can define it in the repository itself
 
-The configuration file can be passed to the CLI via the `--config` argument, by
-default it will try to read `~/.ggate.yaml` from the home directory.
+### Main config
+
+The main configuration file can be passed to the CLI via the `--config`
+argument, by default it will try to read from `/etc/ggate/config.yaml`.
 
 ```yaml
 # global configuration, this is the default
@@ -91,7 +98,7 @@ logLevel: info  # trace|debug|info|warn|error|fatal|panic, default: info
 logFormat: json # json|pretty, default: pretty
 ```
 
-### Repository
+### Repository config
 
 The `globals:` section of the GGate configuration can be overriden from the
 repository itself. If you create a file named `.ggate.yaml` at the root of the

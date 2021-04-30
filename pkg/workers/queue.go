@@ -12,6 +12,8 @@ type WorkerPool struct {
 
   // WorkerQueue is the job queue of a worker
   WorkerQueue chan chan *Job
+
+  // Workers
   Workers []*Worker
 }
 
@@ -33,7 +35,7 @@ func NewWorkerPool(workerCount int, cancel chan struct{}) *WorkerPool {
   }
 }
 
-// Start the worker pool
+// Start worker pool and dispatch job from JobQueue to the worker queue
 func (wp *WorkerPool) Start() {
   for _, worker := range wp.Workers {
     log.Info().

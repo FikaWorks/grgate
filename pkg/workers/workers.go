@@ -22,7 +22,7 @@ func NewWorker(id int, queue chan chan *Job, cancel chan struct{}) *Worker {
 	}
 }
 
-// Start worke, process job from the queue when they arrive
+// Start worker and process job from the queue when they arrive
 func (w *Worker) Start() {
 	go func() {
 		for {

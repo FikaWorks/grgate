@@ -24,6 +24,7 @@ var (
 	version string
 )
 
+// ServerConfig hold configuration to run a server
 type ServerConfig struct {
   ListenAddr string
   Logger zerolog.Logger
@@ -34,6 +35,7 @@ type ServerConfig struct {
   Workers int
 }
 
+// Server hold a server instance
 type Server struct {
   CancelWorker chan struct{}
   Config *ServerConfig
@@ -41,6 +43,7 @@ type Server struct {
   WorkerPool *workers.WorkerPool
 }
 
+// NewServer returns an instance of server
 func NewServer(config *ServerConfig) *Server {
 	// router
 	r := mux.NewRouter()
@@ -70,6 +73,7 @@ func (s *Server) startWorkerPool() {
   s.WorkerPool.Start()
 }
 
+// Start all components required to run a server
 func (s *Server) Start() {
   // handle graceful shutdown
 	quit := make(chan os.Signal)
@@ -95,25 +99,33 @@ func (s *Server) Start() {
 }
 
 func (s *Server) serveHTTP() {
-	log.Info().Msgf("Server started at %s", s.Config.ListenAddr)
-	err := s.Srv.ListenAndServe()
+	log.Info().
+    Msgf("Server started at %s", s.Config.ListenAddr)
 
+  err := s.Srv.ListenAndServe();
 	if err != http.ErrServerClosed {
 		log.Fatal().Err(err).Msg("Failed starting HTTP server")
 	}
 }
 
 func (s *Server) serveProbe() {
-	log.Info().Msgf("Probe server running at %s", s.Config.ProbeAddr)
-	http.ListenAndServe(s.Config.ProbeAddr, healthcheck.NewHandler())
+	log.Info().
+    Msgf("Probe server running at %s", s.Config.ProbeAddr)
+
+  err := http.ListenAndServe(s.Config.ProbeAddr, healthcheck.NewHandler())
+	if err != nil {
+		log.Error().Err(err).Msg("Starting probe listener failed")
+  }
 }
 
 func (s *Server) serveMetrics() {
-	log.Info().Msgf("Serving Prometheus metrics on port %s", s.Config.MetricsAddr)
+	log.Info().
+    Msgf("Serving Prometheus metrics on port %s", s.Config.MetricsAddr)
 
 	http.Handle("/metrics", promhttp.Handler())
 
-	if err := http.ListenAndServe(s.Config.MetricsAddr, nil); err != nil {
+  err := http.ListenAndServe(s.Config.MetricsAddr, nil)
+	if err != nil {
 		log.Error().Err(err).Msg("Starting Prometheus listener failed")
 	}
 }
