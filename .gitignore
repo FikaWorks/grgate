@@ -1,2 +1,3 @@
 *.pem
 ggate
+.DS_Store
