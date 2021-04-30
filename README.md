@@ -14,6 +14,13 @@ GGate is a CLI which can run a server and listen to Git webhook. When a release
 is published as draft, GGate will wait for all the status check attached to the
 commit target of the release to succeed before merging it.
 
+The following diagram represent a concret example where a CI/CD process
+generate/publish versionned artifacts and generate a draft release. Artifacts
+are then deployed by a third party to different environments running with
+different config. End-to-end tests are then run against these 2 environments
+and reports result to the draft release as commit status. When all tests pass,
+GGate publish the Github release.
+
 ![GGate Overview](ggate-overview.png)
 
 ## Getting started
