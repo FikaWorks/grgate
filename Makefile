@@ -7,9 +7,9 @@ DOCKER_IMAGE=fikaworks/ggate
 	all \
 	build \
 	build-docker \
-	test-all \
-	test \
 	lint \
+	test \
+	test-all \
 	vet
 
 all: test-all build-binary
@@ -24,7 +24,7 @@ build-docker:
 build:
 	go build -ldflags="-X 'github.com/fikaworks/ggate/cmd.Version=$(GGATE_VERSION)'" -a -o ggate .
 
-validatet: vet lint test
+validate: vet lint test
 
 test:
 	go test -v -parallel=4 ./...
