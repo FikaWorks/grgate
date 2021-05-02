@@ -8,6 +8,7 @@ DOCKER_IMAGE=fikaworks/ggate
 	build \
 	build-docker \
 	lint \
+	mocks \
 	test \
 	validate
 
@@ -32,3 +33,6 @@ test:
 
 lint:
 	golangci-lint run
+
+mocks:
+	mockgen -source=pkg/platforms/platforms.go -destination=pkg/platforms/mocks/platforms_mock.go

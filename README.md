@@ -177,6 +177,15 @@ $ make lint
 
 ### Tests
 
+Run unit tests:
+
 ```bash
 $ make test
+```
+
+[gomock](https://github.com/golang/mock) mocking framework is used to generate
+mocks, you can regenerate all mocks by using the following command:
+
+```bash
+$ make mocks
 ```

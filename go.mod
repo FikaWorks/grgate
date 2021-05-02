@@ -4,11 +4,11 @@ go 1.16
 
 require (
 	github.com/bradleyfalzon/ghinstallation v1.1.1
+	github.com/golang/mock v1.3.1
 	github.com/google/go-github/v34 v34.0.0
 	github.com/gorilla/mux v1.8.0
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/justinas/alice v1.2.0
-	github.com/mitchellh/go-homedir v1.1.0
 	github.com/prometheus/client_golang v1.10.0
 	github.com/rs/zerolog v1.21.0
 	github.com/spf13/cobra v1.1.3
