@@ -175,6 +175,13 @@ sure to have the binary installed on your machine.
 $ make lint
 ```
 
+You can let `golangci-lint` automatically fix linting issue using the following
+command:
+
+```bash
+$ golangci-lint run --fix
+```
+
 ### Tests
 
 Run unit tests:

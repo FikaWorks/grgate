@@ -44,7 +44,10 @@ issues:
     - linters:
         - errcheck
       text: MarkFlagRequired
-
     - linters:
         - funlen
       source: Process
+    - linters:
+        - dupl
+      path: _test\.go
+
