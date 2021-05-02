@@ -1,3 +1,4 @@
 *.pem
 ggate
 .DS_Store
+dist/

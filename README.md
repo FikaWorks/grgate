@@ -196,3 +196,9 @@ mocks, you can regenerate all mocks by using the following command:
 ```bash
 $ make mocks
 ```
+
+## Release
+
+[GoReleaser](https://goreleaser.com/) is used to generate all the necessary
+binaries and attach them together with the changelog to the Github release. To
+release, create a tag then wait for Github Actions to publish the release.

@@ -9,12 +9,16 @@ DOCKER_IMAGE=fikaworks/ggate
 	build-docker \
 	lint \
 	mocks \
+	push-dockerhub \
 	test \
 	validate
 
 all: \
 	validate \
 	build
+
+build:
+	go build -ldflags="-X 'github.com/fikaworks/ggate/pkg/config.Version=$(GGATE_VERSION)'" -a -o ggate .
 
 build-docker:
 	docker build \
@@ -23,16 +27,20 @@ build-docker:
 		--build-arg GGATE_VERSION=$(GGATE_VERSION) \
 		-t $(DOCKER_IMAGE) .
 
-build:
-	go build -ldflags="-X 'github.com/fikaworks/ggate/pkg/config.Version=$(GGATE_VERSION)'" -a -o ggate .
-
-validate: lint test
-
-test:
-	go test -v -parallel=4 ./...
+push-dockerhub: build-docker
+	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(GGATE_VERSION)
+	docker push $(DOCKER_IMAGE)
+	docker push $(DOCKER_IMAGE):$(GGATE_VERSION)
 
 lint:
 	golangci-lint run
 
 mocks:
 	mockgen -source=pkg/platforms/platforms.go -destination=pkg/platforms/mocks/platforms_mock.go
+
+test:
+	go test -v -parallel=4 ./...
+
+validate: \
+	lint \
+	test
