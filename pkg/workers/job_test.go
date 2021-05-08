@@ -44,7 +44,7 @@ func TestProcess(t *testing.T) {
 
 			mockPlatforms.EXPECT().PublishRelease(gomock.Any(), gomock.Any(),
 				gomock.Any()).DoAndReturn(
-				func(_ string, _ string, _ int64) (bool, error) {
+				func(_ string, _ string, _ interface{}) (bool, error) {
 					return true, nil
 				})
 
