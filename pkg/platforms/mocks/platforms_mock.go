@@ -94,23 +94,23 @@ func (mr *MockPlatformMockRecorder) ListReleases(arg0, arg1 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListReleases", reflect.TypeOf((*MockPlatform)(nil).ListReleases), arg0, arg1)
 }
 
-// ListStatus mocks base method.
-func (m *MockPlatform) ListStatus(arg0, arg1, arg2 string) ([]*platforms.Status, error) {
+// ListStatuses mocks base method.
+func (m *MockPlatform) ListStatuses(arg0, arg1, arg2 string) ([]*platforms.Status, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListStatus", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "ListStatuses", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]*platforms.Status)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListStatus indicates an expected call of ListStatus.
-func (mr *MockPlatformMockRecorder) ListStatus(arg0, arg1, arg2 interface{}) *gomock.Call {
+// ListStatuses indicates an expected call of ListStatuses.
+func (mr *MockPlatformMockRecorder) ListStatuses(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListStatus", reflect.TypeOf((*MockPlatform)(nil).ListStatus), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListStatuses", reflect.TypeOf((*MockPlatform)(nil).ListStatuses), arg0, arg1, arg2)
 }
 
 // PublishRelease mocks base method.
-func (m *MockPlatform) PublishRelease(arg0, arg1 string, arg2 int64) (bool, error) {
+func (m *MockPlatform) PublishRelease(arg0, arg1 string, arg2 interface{}) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PublishRelease", arg0, arg1, arg2)
 	ret0, _ := ret[0].(bool)
@@ -125,10 +125,10 @@ func (mr *MockPlatformMockRecorder) PublishRelease(arg0, arg1, arg2 interface{})
 }
 
 // ReadFile mocks base method.
-func (m *MockPlatform) ReadFile(arg0, arg1, arg2 string) (io.ReadCloser, error) {
+func (m *MockPlatform) ReadFile(arg0, arg1, arg2 string) (io.Reader, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReadFile", arg0, arg1, arg2)
-	ret0, _ := ret[0].(io.ReadCloser)
+	ret0, _ := ret[0].(io.Reader)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

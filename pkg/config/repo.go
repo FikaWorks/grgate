@@ -1,6 +1,8 @@
 package config
 
 import (
+	"bytes"
+
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 
@@ -16,40 +18,34 @@ func NewRepoConfig(platform platforms.Platform, owner, repository string) (confi
 			Str("repository", repository).
 			Msgf("File \"%s\" not found in repository, using default settings",
 				Main.RepoConfigPath)
-
-		config = &RepoConfig{}
+		cfg = bytes.NewBuffer([]byte{})
 	} else {
 		log.Info().
 			Str("owner", owner).
 			Str("repository", repository).
 			Msgf("Found file \"%s\" in repository, overriding settings",
 				Main.RepoConfigPath)
-
-		v := viper.New()
-		v.SetConfigName(".ggate.yaml")
-		v.SetConfigType("yaml")
-		if err = v.ReadConfig(cfg); err != nil {
-			return
-		}
-
-		if err = v.Unmarshal(&config); err != nil {
-			log.Error().
-				Err(err).
-				Str("owner", owner).
-				Str("repository", repository).
-				Msgf("couldn't unmarshal config \"%s\" from repository",
-					Main.RepoConfigPath)
-			return
-		}
 	}
 
-	// set defaults from Globals if not defined in the repository configuration
-	if config.TagRegexp == "" {
-		config.TagRegexp = Main.Globals.TagRegexp
+	v := viper.New()
+	v.SetConfigType("yaml")
+
+	// Set defaults
+	v.SetDefault("Enabled", Main.Globals.Enabled)
+	v.SetDefault("Statuses", Main.Globals.Statuses)
+	v.SetDefault("TagRegexp", Main.Globals.TagRegexp)
+
+	if err = v.ReadConfig(cfg); err != nil {
+		return
 	}
 
-	if len(config.Statuses) == 0 {
-		config.Statuses = Main.Globals.Statuses
+	if err = v.Unmarshal(&config); err != nil {
+		log.Error().
+			Err(err).
+			Str("owner", owner).
+			Str("repository", repository).
+			Msg("couldn't unmarshal repo config")
+		return
 	}
 
 	return config, nil

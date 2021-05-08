@@ -10,13 +10,14 @@ var (
 
 // MainConfig define the main configuration
 type MainConfig struct {
-	Github         Github     `mapstructure:"github"`
-	Globals        RepoConfig `mapstructure:"globals"`
-	LogFormat      string     `mapstructure:"logFormat"`
-	LogLevel       string     `mapstructure:"logLevel"`
-	RepoConfigPath string     `mapstructure:"repoConfigPath"`
-	Server         Server     `mapstructure:"server"`
-	Workers        int        `mapstructure:"workers"`
+	Github         *Github     `mapstructure:"github"`
+	Gitlab         *Gitlab     `mapstructure:"gitlab"`
+	Globals        *RepoConfig `mapstructure:"globals"`
+	LogFormat      string      `mapstructure:"logFormat"`
+	LogLevel       string      `mapstructure:"logLevel"`
+	RepoConfigPath string      `mapstructure:"repoConfigPath"`
+	Server         *Server     `mapstructure:"server"`
+	Workers        int         `mapstructure:"workers"`
 }
 
 // Server define server configuration
@@ -32,6 +33,12 @@ type Github struct {
 	InstallationID int64  `mapstructure:"installationID"`
 	PrivateKeyPath string `mapstructure:"privateKeyPath"`
 	WebhookSecret  string `mapstructure:"webhookSecret"`
+}
+
+// Gitlab define Gitlab configuration
+type Gitlab struct {
+	Token         string `mapstructure:"token"`
+	WebhookSecret string `mapstructure:"webhookSecret"`
 }
 
 // RepoConfig define repository configuration

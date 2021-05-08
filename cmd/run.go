@@ -7,8 +7,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/fikaworks/ggate/pkg/config"
-	"github.com/fikaworks/ggate/pkg/platforms"
 	"github.com/fikaworks/ggate/pkg/utils"
 	"github.com/fikaworks/ggate/pkg/workers"
 )
@@ -46,13 +44,9 @@ release is published.`,
 			log.Info().Msg("Executing command with dry-run mode enabled")
 		}
 
-		platform, err := platforms.NewGithub(&platforms.GithubConfig{
-			AppID:          config.Main.Github.AppID,
-			InstallationID: config.Main.Github.InstallationID,
-			PrivateKeyPath: config.Main.Github.PrivateKeyPath,
-		})
+		platform, err := newPlatform()
 		if err != nil {
-			return err
+			return
 		}
 
 		job, err := workers.NewJob(platform, owner, repository)

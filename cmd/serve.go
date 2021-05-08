@@ -5,7 +5,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/fikaworks/ggate/pkg/config"
-	"github.com/fikaworks/ggate/pkg/platforms"
 	"github.com/fikaworks/ggate/pkg/server"
 )
 
@@ -20,13 +19,9 @@ functionnalities:
   - 0.0.0.0:8086 expose health probe (liveness/readiness)
 `,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		platform, err := platforms.NewGithub(&platforms.GithubConfig{
-			AppID:          config.Main.Github.AppID,
-			InstallationID: config.Main.Github.InstallationID,
-			PrivateKeyPath: config.Main.Github.PrivateKeyPath,
-		})
+		platform, err := newPlatform()
 		if err != nil {
-			return err
+			return
 		}
 
 		srv := server.NewServer(&server.Config{

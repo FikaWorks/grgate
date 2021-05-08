@@ -7,8 +7,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/fikaworks/ggate/pkg/config"
-	"github.com/fikaworks/ggate/pkg/platforms"
 	"github.com/fikaworks/ggate/pkg/utils"
 )
 
@@ -35,16 +33,12 @@ var statusListCmd = &cobra.Command{
 		log.Info().Msgf("Listing statuses for commit %s in repository %s",
 			statusListFlags.commitSha, args[0])
 
-		platform, err := platforms.NewGithub(&platforms.GithubConfig{
-			AppID:          config.Main.Github.AppID,
-			InstallationID: config.Main.Github.InstallationID,
-			PrivateKeyPath: config.Main.Github.PrivateKeyPath,
-		})
+		platform, err := newPlatform()
 		if err != nil {
 			return
 		}
 
-		statusList, err := platform.ListStatus(utils.GetRepositoryOrganization(args[0]),
+		statusList, err := platform.ListStatuses(utils.GetRepositoryOrganization(args[0]),
 			utils.GetRepositoryName(args[0]), statusListFlags.commitSha)
 		if err != nil {
 			return

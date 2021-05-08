@@ -7,7 +7,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/fikaworks/ggate/pkg/config"
 	"github.com/fikaworks/ggate/pkg/platforms"
 	"github.com/fikaworks/ggate/pkg/utils"
 )
@@ -39,11 +38,7 @@ var statusSetCmd = &cobra.Command{
 			statusSetFlags.commitSha, statusSetFlags.name, statusSetFlags.status,
 			statusSetFlags.state)
 
-		platform, err := platforms.NewGithub(&platforms.GithubConfig{
-			AppID:          config.Main.Github.AppID,
-			InstallationID: config.Main.Github.InstallationID,
-			PrivateKeyPath: config.Main.Github.PrivateKeyPath,
-		})
+		platform, err := newPlatform()
 		if err != nil {
 			return
 		}
@@ -78,9 +73,11 @@ func init() {
 	statusGetCmd.MarkFlagRequired("name")
 
 	flags.StringVar(&statusSetFlags.status, "status", "",
-		"status, one of \"queued\", \"in_progress\", \"completed\"")
+		"for Github status must be one of: queued, in_progress or completed\n"+
+			"for Gitlab, status must be one of: pending, running, success, failed or\n"+
+			"canceled")
 	statusGetCmd.MarkFlagRequired("status")
 
 	flags.StringVar(&statusSetFlags.state, "state", "",
-		"commit status state is one of \"success\", \"in_progress\"")
+		"(Github only) commit status state is one of success, in_progress")
 }

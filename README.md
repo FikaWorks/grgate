@@ -5,8 +5,8 @@ GGate - Git release gate
 releases based on commit status (aka checks). It can be triggered automatically
 using Git webhook or directly from the CLI.
 
-Currently, only the Github platform is supported, Gitlab and other platform
-will in a near future.
+Currently, only Github and Gitlab are supported, other provider could come in a
+near future.
 
 ## Overview
 
@@ -22,6 +22,20 @@ and reports result to the draft release as commit status. When all tests pass,
 GGate publish the Github release.
 
 ![GGate Overview](ggate-overview.png)
+
+### Unpublished releases terminology
+
+Different terminology is used by different provider:
+
+- **Github** uses the term [draft
+releases](https://docs.github.com/en/github/administering-a-repository/managing-releases-in-a-repository#about-release-management)
+to prepare a release without publishing it.
+- **Gitlab** uses the term [upcoming
+releases](https://docs.gitlab.com/ee/api/releases/#upcoming-releases), it is
+similar to Github Pre-releases where a badge notify the upcoming release in the
+Gitlab release page.  The attribute `released_at` should be set to a future
+date to have it enabled and it is only possible to change it using the Gitlab
+API.
 
 ## Getting started
 
@@ -96,6 +110,10 @@ github:
   installationID: 00000000
   privateKeyPath: path-to-key.pem
   webhookSecret: a-random-string
+
+# Gitlab configuration
+gitlab:
+  token: gitlab-token
 
 # configuration can be overriden in the repository itself, you can define the
 # default path below, default: .ggate.yaml

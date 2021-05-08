@@ -11,7 +11,7 @@ import (
 
 const (
 	// number of items per page to retrieve via the Github API
-	perPage int = 100
+	githubPerPage int = 100
 )
 
 // GithubConfig hold the Github configuration
@@ -19,7 +19,6 @@ type GithubConfig struct {
 	AppID          int64
 	InstallationID int64
 	PrivateKeyPath string
-	WebhookSecret  string
 }
 
 type githubPlatform struct {
@@ -47,8 +46,8 @@ func NewGithub(config *GithubConfig) (platform Platform, err error) {
 	return
 }
 
-// ReadFile located at the provided path in a given Github repository
-func (p *githubPlatform) ReadFile(owner, repository, path string) (content io.ReadCloser, err error) {
+// ReadFile retrieve file located at the provided path in a given Github repository
+func (p *githubPlatform) ReadFile(owner, repository, path string) (content io.Reader, err error) {
 	content, _, err = p.client.Repositories.DownloadContents(p.context, owner,
 		repository, path, nil)
 	return
@@ -58,18 +57,19 @@ func (p *githubPlatform) ReadFile(owner, repository, path string) (content io.Re
 // Important: information about published releases are available to everyone.
 // Only users with push access will receive listings for draft releases.
 func (p *githubPlatform) ListReleases(owner, repository string) (releases []*Release, err error) {
-	opt := &github.ListOptions{
+	opts := &github.ListOptions{
 		Page:    0,
-		PerPage: perPage,
+		PerPage: githubPerPage,
 	}
 
 	for {
 		releaseList, resp, err := p.client.Repositories.ListReleases(p.context,
-			owner, repository, opt)
+			owner, repository, opts)
 		if err != nil {
 			return nil, err
 		}
 
+		// for all statuses, check if the provided one are all successful
 		for _, release := range releaseList {
 			id := *release.ID
 			tag := *release.TagName
@@ -93,16 +93,16 @@ func (p *githubPlatform) ListReleases(owner, repository string) (releases []*Rel
 			break
 		}
 
-		opt.Page = resp.NextPage
+		opts.Page = resp.NextPage
 	}
 
 	return releases, err
 }
 
 // PublishRelease publish a release based on a provided releases ID
-func (p *githubPlatform) PublishRelease(owner, repository string, id int64) (published bool, err error) {
+func (p *githubPlatform) PublishRelease(owner, repository string, id interface{}) (published bool, err error) {
 	release, _, err := p.client.Repositories.GetRelease(p.context, owner,
-		repository, id)
+		repository, id.(int64))
 	if err != nil {
 		return
 	}
@@ -110,7 +110,7 @@ func (p *githubPlatform) PublishRelease(owner, repository string, id int64) (pub
 	release.Draft = github.Bool(false)
 
 	_, _, err = p.client.Repositories.EditRelease(p.context, owner, repository,
-		id, release)
+		id.(int64), release)
 	if err != nil {
 		return
 	}
@@ -126,16 +126,16 @@ func (p *githubPlatform) CheckAllStatusSucceeded(owner, repository,
 		return
 	}
 
-	opt := &github.ListCheckRunsOptions{
+	opts := &github.ListCheckRunsOptions{
 		ListOptions: github.ListOptions{
 			Page:    0,
-			PerPage: perPage,
+			PerPage: githubPerPage,
 		},
 	}
 
 	for {
 		getCheckRun, resp, err := p.client.Checks.ListCheckRunsForRef(p.context,
-			owner, repository, commitSha, opt)
+			owner, repository, commitSha, opts)
 		if err != nil {
 			return false, err
 		}
@@ -156,15 +156,15 @@ func (p *githubPlatform) CheckAllStatusSucceeded(owner, repository,
 			break
 		}
 
-		opt.ListOptions.Page = resp.NextPage
+		opts.ListOptions.Page = resp.NextPage
 	}
 
 	return succeeded, err
 }
 
-// CreateStatus for a given commit
+// GetStatus returns the status of a specific commit matching a provided status name
 func (p *githubPlatform) CreateStatus(owner, repository string, status *Status) (err error) {
-	checkRunOpt := github.CreateCheckRunOptions{
+	opts := github.CreateCheckRunOptions{
 		Name:      status.Name,
 		HeadSHA:   status.CommitSha,
 		Status:    github.String(status.Status),
@@ -172,18 +172,17 @@ func (p *githubPlatform) CreateStatus(owner, repository string, status *Status) 
 	}
 
 	if status.State != "" {
-		checkRunOpt.Conclusion = github.String(status.State)
+		opts.Conclusion = github.String(status.State)
 	}
 
-	_, _, err = p.client.Checks.CreateCheckRun(p.context, owner, repository,
-		checkRunOpt)
+	_, _, err = p.client.Checks.CreateCheckRun(p.context, owner, repository, opts)
 
 	return
 }
 
 // GetStatus from provided commit and status name
 func (p *githubPlatform) GetStatus(owner, repository, commitSha, statusName string) (status *Status, err error) {
-	statusList, err := p.ListStatus(owner, repository, commitSha)
+	statusList, err := p.ListStatuses(owner, repository, commitSha)
 	if err != nil {
 		return
 	}
@@ -198,18 +197,18 @@ func (p *githubPlatform) GetStatus(owner, repository, commitSha, statusName stri
 	return
 }
 
-// ListStatus from provided commit
-func (p *githubPlatform) ListStatus(owner, repository, commitSha string) (statusList []*Status, err error) {
-	opt := &github.ListCheckRunsOptions{
+// ListStatuses attached to a given commit sha
+func (p *githubPlatform) ListStatuses(owner, repository, commitSha string) (statusList []*Status, err error) {
+	opts := &github.ListCheckRunsOptions{
 		ListOptions: github.ListOptions{
 			Page:    0,
-			PerPage: perPage,
+			PerPage: githubPerPage,
 		},
 	}
 
 	for {
 		getCheckRun, resp, err := p.client.Checks.ListCheckRunsForRef(p.context,
-			owner, repository, commitSha, opt)
+			owner, repository, commitSha, opts)
 		if err != nil {
 			return nil, err
 		}
@@ -231,7 +230,7 @@ func (p *githubPlatform) ListStatus(owner, repository, commitSha string) (status
 			break
 		}
 
-		opt.ListOptions.Page = resp.NextPage
+		opts.ListOptions.Page = resp.NextPage
 	}
 
 	return statusList, err
