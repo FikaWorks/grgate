@@ -56,7 +56,9 @@ func NewServer(config *Config) *Server {
 
 	webhook := NewWebhookHandler(config.Platform, config.WebhookSecret,
 		workerPool.JobQueue)
+
 	r.HandleFunc("/github/webhook", webhook.GithubHandler).Methods("POST")
+	r.HandleFunc("/gitlab/webhook", webhook.GitlabHandler).Methods("POST")
 
 	srv := &http.Server{
 		Addr:    config.ListenAddr,

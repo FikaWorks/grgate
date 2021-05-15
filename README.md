@@ -27,21 +27,21 @@ GGate publish the Github release.
 
 Different terminology is used by different provider:
 
-- **Github** uses the term [draft
-releases](https://docs.github.com/en/github/administering-a-repository/managing-releases-in-a-repository#about-release-management)
-to prepare a release without publishing it.
-- **Gitlab** uses the term [upcoming
-releases](https://docs.gitlab.com/ee/api/releases/#upcoming-releases), it is
-similar to Github Pre-releases where a badge notify the upcoming release in the
-Gitlab release page.  The attribute `released_at` should be set to a future
-date to have it enabled and it is only possible to change it using the Gitlab
-API.
+- **Github** uses the term [draft releases][0] to prepare a release without
+publishing it.
+- **Gitlab** uses the term [upcoming releases][1], it is similar to Github
+Pre-releases where a badge notify the upcoming release in the Gitlab release
+page.  The attribute `released_at` should be set to a future date to have it
+enabled and it is only possible to change it using the Gitlab API.
+
+[0]: https://docs.github.com/en/github/administering-a-repository/managing-releases-in-a-repository#about-release-management
+[1]: https://docs.gitlab.com/ee/api/releases/#upcoming-releases
 
 ## Getting started
 
-Download latest release from the [release page][0].
+Download latest release from the [release page][2].
 
-[0]: https://github.com/fikaworks/ggate/releases
+[2]: https://github.com/fikaworks/ggate/releases
 
 ```bash
 # check available commands
@@ -51,13 +51,13 @@ $ ggate --help
 $ ggate run FikaWorks/ggate
 
 # listen to Git webhook events on 0.0.0.0:8080
-$ ggate serve
+$ ggate serve -c config.yaml
 
 # list status for a given commit in the FikaWorks/ggate repository
 $ ggate status list FikaWorks/ggate \
     --commit 93431f42d5a5abc2bb6703fc723b162a9d2f20c3
 
-# set status of given commit
+# set status of given commit (Github)
 $ ggate status set FikaWorks/ggate \
     --commit 93431f42d5a5abc2bb6703fc723b162a9d2f20c3 \
     --name e2e-happyflow \
@@ -90,17 +90,30 @@ globals:
   statuses:
     - e2e happy flow
 
+# server configuration (webhook)
+# webhook should be sent to /<provider>/webhook, where provider is either
+# github or gitlab
 server:
   listenAddress: 0.0.0.0:8080
   metricsAddress: 0.0.0.0:9101
   probeAddress: 0.0.0.0:8086
+  webhookSecret: a-random-string
 
 # number of workers to run, default: 1
 workers: 1
 
+# platform to use
+platform: github # github|gitlab, default: github
+
 # Github configuration
-# when creating the Github app, make sure to select the following webhook
-# events:
+# when creating the Github app, make sure to set the following permissions:
+#   - Administration read/write
+#   - Checks read/write
+#   - Contents read/write
+#   - Metadata read-only
+#   - Commit statuses read/write
+#
+# subscribe to the following webhook events:
 #   - Check runs
 #   - Check suites
 #   - Releases
@@ -109,9 +122,13 @@ github:
   appID: 000000
   installationID: 00000000
   privateKeyPath: path-to-key.pem
-  webhookSecret: a-random-string
 
 # Gitlab configuration
+# when creating the Gitlab token, make sure to set the following permissions:
+#   - read_repository
+# subscribe to the following webhook events:
+#   - Release events
+#   - Pipeline events
 gitlab:
   token: gitlab-token
 
