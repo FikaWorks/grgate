@@ -6,7 +6,7 @@ import (
 )
 
 func newPlatform() (platform platforms.Platform, err error) {
-	if config.Main.Gitlab.Token != "" {
+	if *config.Main.Platform == config.GitlabPlatform {
 		platform, err = platforms.NewGitlab(&platforms.GitlabConfig{
 			Token: config.Main.Gitlab.Token,
 		})

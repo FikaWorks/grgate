@@ -26,12 +26,12 @@ functionnalities:
 
 		srv := server.NewServer(&server.Config{
 			ListenAddr:    config.Main.Server.ListenAddress,
+			Logger:        log.Logger,
 			MetricsAddr:   config.Main.Server.MetricsAddress,
 			Platform:      platform,
 			ProbeAddr:     config.Main.Server.ProbeAddress,
-			WebhookSecret: config.Main.Github.WebhookSecret,
+			WebhookSecret: config.Main.Server.WebhookSecret,
 			Workers:       config.Main.Workers,
-			Logger:        log.Logger,
 		})
 		srv.Start()
 

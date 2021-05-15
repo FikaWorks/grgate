@@ -24,6 +24,14 @@ var statusSetFlags statusSetFlagsStruct
 var statusSetCmd = &cobra.Command{
 	Use:   "set [OWNER/REPOSITORY]",
 	Short: "Set a status to a given commit",
+	Long: `Examples:
+  # set the e2e-happy-flow status to completed (github)
+  ggate status set --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e \
+    --name e2e-happy-flow --status completed --state success
+
+  # set the e2e-happy-flow status to success (gitlab)
+  ggate status set --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e \
+    --name e2e-happy-flow --status success`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires at least one arg")
@@ -74,8 +82,8 @@ func init() {
 
 	flags.StringVar(&statusSetFlags.status, "status", "",
 		"for Github status must be one of: queued, in_progress or completed\n"+
-			"for Gitlab, status must be one of: pending, running, success, failed or\n"+
-			"canceled")
+			"for Gitlab, status must be one of: pending, running, success, failed\n"+
+			"or canceled")
 	statusGetCmd.MarkFlagRequired("status")
 
 	flags.StringVar(&statusSetFlags.state, "state", "",

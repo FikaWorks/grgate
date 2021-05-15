@@ -20,6 +20,9 @@ var statusListFlags statusListFlagsStruct
 var statusListCmd = &cobra.Command{
 	Use:   "list [OWNER/REPOSITORY]",
 	Short: "List statuses attached to a given commit",
+	Long: `Example:
+  # list statuses associated to a given commit
+  ggate status list --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires at least one arg")
@@ -38,8 +41,8 @@ var statusListCmd = &cobra.Command{
 			return
 		}
 
-		statusList, err := platform.ListStatuses(utils.GetRepositoryOrganization(args[0]),
-			utils.GetRepositoryName(args[0]), statusListFlags.commitSha)
+		statusList, err := platform.ListStatuses(utils.GetRepositoryOrganization(
+			args[0]), utils.GetRepositoryName(args[0]), statusListFlags.commitSha)
 		if err != nil {
 			return
 		}

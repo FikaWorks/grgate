@@ -21,6 +21,10 @@ var statusGetFlags statusGetFlagsStruct
 var statusGetCmd = &cobra.Command{
 	Use:   "get [OWNER/REPOSITORY]",
 	Short: "Get a status attached to a given commit by name",
+	Long: `Example:
+  # get the e2e-happy-flow status associated to a given commit
+  ggate status get --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e \
+    --name e2e-happy-flow`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires at least one arg")

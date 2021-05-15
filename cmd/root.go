@@ -18,9 +18,9 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "ggate",
 	Short: "Publish draft/unpublished releases if all status check succeed",
-	Long: `GGate is git release gate utility which autopublish draft/unpublished
-releases based on commit status (aka checks). It can be triggered automatically
-using Git webhook or directly from the CLI.`,
+	Long: `GGate is a git release gate utility which autopublish
+draft/unpublished releases based on commit status (aka checks). It can be
+triggered automatically using Git webhook or directly from the CLI.`,
 }
 
 func init() {
@@ -30,14 +30,16 @@ func init() {
 
 	flags.StringVarP(&cfgFile, "config", "c", "",
 		"config file (default is $HOME/.ggate.yaml)")
-
 	flags.Int64("github.appID", 0, "Github App ID")
 	flags.Int64("github.installationID", 0, "Github Installation ID")
 	flags.String("github.privateKeyPath", "", "Github private key path")
 	flags.String("github.webhookSecret", "", "Github webhook secret")
+	flags.String("gitlab.token", "", "Gitlab Token")
 	flags.String("logLevel", "info", "Log level: trace, debug, info, warn,"+
 		"error, fatal or panic")
 	flags.String("logFormat", "pretty", "Log format: json or pretty")
+	flags.String("platform", "", "Platform to run against: github or gitlab"+
+		"(default: github)")
 }
 
 func initConfig() {

@@ -26,7 +26,14 @@ var runCmd = &cobra.Command{
 	Long: `The run command list all the draft/unpublished releases from a given
 repository that match the provided tag. From this list, if all the status check
 are completed and successful and match the list of provided status, then the
-release is published.`,
+release is published.
+
+Example:
+  # run against the FikaWorks/my-repo repository, publish draft release which
+  # with tag matching a stable semver tag (ie: v1.2.3) and both statuses
+  # e2e-happyflow and e2e-useraccountflow succeeded:
+  ggate run FikaWorks/my-repo --tag-regexp "^v[0-9]+\.[0-9]+\.[0-9]+$" \
+    -s e2e-happyflow -s e2e-useraccountflow`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires at least one arg")
