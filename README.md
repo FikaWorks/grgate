@@ -232,6 +232,21 @@ mocks, you can regenerate all mocks by using the following command:
 $ make mocks
 ```
 
+### Integration tests
+
+Run integration tests against all platforms. The tests create temporary
+repositories and run a series of tests against them.
+
+```bash
+$ export GITLAB_OWNER=<gitlab repository owner>
+$ export GITLAB_TOKEN=<gitlab api token>
+$ export GITHUB_OWNER=<github repository owner>
+$ export GITHUB_PRIVATE_KEY_PATH=<github private key path>
+$ export GITHUB_APP_ID=<github app id>
+$ export GITHUB_INSTALLATION_ID=<github installation id>
+$ make integration
+```
+
 ## Release
 
 [GoReleaser](https://goreleaser.com/) is used to generate all the necessary

@@ -7,6 +7,9 @@ DOCKER_IMAGE=fikaworks/ggate
 	all \
 	build \
 	build-docker \
+	integration \
+	integration-github \
+	integration-gitlab \
 	lint \
 	mocks \
 	push-dockerhub \
@@ -44,3 +47,12 @@ test:
 validate: \
 	lint \
 	test
+
+integration:
+	go test -tags=integration ./...
+
+integration-github:
+	go test -tags=integrationgithub ./...
+
+integration-gitlab:
+	go test -tags=integrationgitlab ./...
