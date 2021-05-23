@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/fikaworks/ggate/pkg/config"
+	"github.com/fikaworks/grgate/pkg/config"
 )
 
 var (
@@ -16,9 +16,9 @@ var (
 
 // rootCmd represents the root command
 var rootCmd = &cobra.Command{
-	Use:   "ggate",
+	Use:   "grgate",
 	Short: "Publish draft/unpublished releases if all status check succeed",
-	Long: `GGate is a git release gate utility which autopublish
+	Long: `GRGate is a git release gate utility which autopublish
 draft/unpublished releases based on commit status (aka checks). It can be
 triggered automatically using Git webhook or directly from the CLI.`,
 }
@@ -29,7 +29,7 @@ func init() {
 	flags := rootCmd.PersistentFlags()
 
 	flags.StringVarP(&cfgFile, "config", "c", "",
-		"config file (default is $HOME/.ggate.yaml)")
+		"config file (default is $HOME/.grgate.yaml)")
 	flags.Int64("github.appID", 0, "Github App ID")
 	flags.Int64("github.installationID", 0, "Github Installation ID")
 	flags.String("github.privateKeyPath", "", "Github private key path")

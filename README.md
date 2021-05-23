@@ -1,7 +1,7 @@
-GGate - Git release gate
-========================
+GRGate - Git release gate
+=========================
 
-> **ggate**, is git release gate utility which autopublish draft/unpublished
+> **grgate**, is git release gate utility which autopublish draft/unpublished
 releases based on commit status (aka checks). It can be triggered automatically
 using Git webhook or directly from the CLI.
 
@@ -10,8 +10,8 @@ near future.
 
 ## Overview
 
-GGate is a CLI which can run a server and listen to Git webhook. When a release
-is published as draft, GGate will wait for all the status check attached to the
+GRGate is a CLI which can run a server and listen to Git webhook. When a release
+is published as draft, GRGate will wait for all the status check attached to the
 commit target of the release to succeed before merging it.
 
 The following diagram represent a concret example where a CI/CD process
@@ -19,9 +19,9 @@ generate/publish versionned artifacts and generate a draft release. Artifacts
 are then deployed by a third party to different environments running with
 different config. End-to-end tests are then run against these 2 environments
 and reports result to the draft release as commit status. When all tests pass,
-GGate publish the Github release.
+GRGate publish the Github release.
 
-![GGate Overview](ggate-overview.png)
+![GRGate Overview](grgate-overview.png)
 
 ### Unpublished releases terminology
 
@@ -41,24 +41,24 @@ enabled and it is only possible to change it using the Gitlab API.
 
 Download latest release from the [release page][2].
 
-[2]: https://github.com/fikaworks/ggate/releases
+[2]: https://github.com/fikaworks/grgate/releases
 
 ```bash
 # check available commands
-$ ggate --help
+$ grgate --help
 
-# run GGate against the Github repository FikaWorks/ggate:
-$ ggate run FikaWorks/ggate
+# run GRGate against the Github repository FikaWorks/grgate:
+$ grgate run FikaWorks/grgate
 
 # listen to Git webhook events on 0.0.0.0:8080
-$ ggate serve -c config.yaml
+$ grgate serve -c config.yaml
 
-# list status for a given commit in the FikaWorks/ggate repository
-$ ggate status list FikaWorks/ggate \
+# list status for a given commit in the FikaWorks/grgate repository
+$ grgate status list FikaWorks/grgate \
     --commit 93431f42d5a5abc2bb6703fc723b162a9d2f20c3
 
 # set status of given commit (Github)
-$ ggate status set FikaWorks/ggate \
+$ grgate status set FikaWorks/grgate \
     --commit 93431f42d5a5abc2bb6703fc723b162a9d2f20c3 \
     --name e2e-happyflow \
     --status completed \
@@ -67,7 +67,7 @@ $ ggate status set FikaWorks/ggate \
 
 ## Config reference
 
-GGate has 2 types of configuration:
+GRGate has 2 types of configuration:
 - **main config** which define global, server settings and credentials to talk
 to external API like Github
 - **repo config** which is a file stored in the repository and define the
@@ -77,7 +77,7 @@ override a setting you can define it in the repository itself
 ### Main config
 
 The main configuration file can be passed to the CLI via the `--config`
-argument, by default it will try to read from `/etc/ggate/config.yaml`.
+argument, by default it will try to read from `/etc/grgate/config.yaml`.
 
 ```yaml
 # global configuration, this is the default
@@ -133,8 +133,8 @@ gitlab:
   token: gitlab-token
 
 # configuration can be overriden in the repository itself, you can define the
-# default path below, default: .ggate.yaml
-repoConfigPath: .ggate.yaml
+# default path below, default: .grgate.yaml
+repoConfigPath: .grgate.yaml
 
 logLevel: info  # trace|debug|info|warn|error|fatal|panic, default: info
 logFormat: json # json|pretty, default: pretty
@@ -142,9 +142,9 @@ logFormat: json # json|pretty, default: pretty
 
 ### Repository config
 
-The `globals:` section of the GGate configuration can be overriden from the
-repository itself. If you create a file named `.ggate.yaml` at the root of the
-repository, GGate will read it before processing the repository.
+The `globals:` section of the GRGate configuration can be overriden from the
+repository itself. If you create a file named `.grgate.yaml` at the root of the
+repository, GRGate will read it before processing the repository.
 
 ```yaml
 # only process releases with tag matching a regular expression pattern
@@ -185,20 +185,20 @@ $ go run main.go serve
 ```
 
 If you create/update a status check or create a draft release, you should see
-GGate processing the triggering repository.
+GRGate processing the triggering repository.
 
 ### Build binary
 
 ```bash
 $ make build
-$ ./ggate --help
+$ ./grgate --help
 ```
 
 ### Docker
 
 ```bash
 $ make build-docker
-$ docker run --ti -p 8080:8080 fikaworks/ggate
+$ docker run --ti -p 8080:8080 fikaworks/grgate
 ```
 
 ### Lint

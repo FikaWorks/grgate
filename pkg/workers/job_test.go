@@ -6,9 +6,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/rs/zerolog"
 
-	"github.com/fikaworks/ggate/pkg/config"
-	"github.com/fikaworks/ggate/pkg/platforms"
-	mock_platforms "github.com/fikaworks/ggate/pkg/platforms/mocks"
+	"github.com/fikaworks/grgate/pkg/config"
+	"github.com/fikaworks/grgate/pkg/platforms"
+	mock_platforms "github.com/fikaworks/grgate/pkg/platforms/mocks"
 )
 
 func TestProcess(t *testing.T) {

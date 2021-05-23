@@ -1,4 +1,4 @@
 *.pem
-ggate
+grgate
 .DS_Store
 dist/

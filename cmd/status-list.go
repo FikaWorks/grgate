@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/fikaworks/ggate/pkg/utils"
+	"github.com/fikaworks/grgate/pkg/utils"
 )
 
 type statusListFlagsStruct struct {
@@ -22,7 +22,7 @@ var statusListCmd = &cobra.Command{
 	Short: "List statuses attached to a given commit",
 	Long: `Example:
   # list statuses associated to a given commit
-  ggate status list --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e`,
+  grgate status list --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires at least one arg")

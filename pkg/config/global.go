@@ -12,7 +12,7 @@ func NewGlobalConfig(path string) (v *viper.Viper, err error) {
 	if path != "" {
 		v.SetConfigFile(path)
 	} else {
-		v.AddConfigPath("/etc/ggate")
+		v.AddConfigPath("/etc/grgate")
 		v.SetConfigName("config.yaml")
 		v.SetConfigType("yaml")
 	}
@@ -21,7 +21,7 @@ func NewGlobalConfig(path string) (v *viper.Viper, err error) {
 	v.SetDefault("platform", "github")
 	v.SetDefault("globals.enabled", true)
 	v.SetDefault("globals.tagRegexp", ".*")
-	v.SetDefault("repoConfigPath", ".ggate.yaml")
+	v.SetDefault("repoConfigPath", ".grgate.yaml")
 	v.SetDefault("server.listenAddress", "0.0.0.0:8080")
 	v.SetDefault("server.metricsAddress", "0.0.0.0:9101")
 	v.SetDefault("server.probeAddress", "0.0.0.0:8086")

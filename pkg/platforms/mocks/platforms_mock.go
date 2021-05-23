@@ -8,7 +8,7 @@ import (
 	io "io"
 	reflect "reflect"
 
-	platforms "github.com/fikaworks/ggate/pkg/platforms"
+	platforms "github.com/fikaworks/grgate/pkg/platforms"
 	gomock "github.com/golang/mock/gomock"
 )
 

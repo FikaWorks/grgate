@@ -4,7 +4,7 @@ var (
 	// Main contains the generated main configuration
 	Main *MainConfig
 
-	// Version of GGate
+	// Version of GRGate
 	Version string
 )
 

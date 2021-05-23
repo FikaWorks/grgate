@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/fikaworks/ggate/pkg/config"
-	"github.com/fikaworks/ggate/pkg/platforms"
+	"github.com/fikaworks/grgate/pkg/config"
+	"github.com/fikaworks/grgate/pkg/platforms"
 )
 
 func newPlatform() (platform platforms.Platform, err error) {

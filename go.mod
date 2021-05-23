@@ -1,4 +1,4 @@
-module github.com/fikaworks/ggate
+module github.com/fikaworks/grgate
 
 go 1.16
 
@@ -13,8 +13,6 @@ require (
 	github.com/rs/zerolog v1.21.0
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.0
-	github.com/xanzy/go-gitlab v0.49.0
+	github.com/xanzy/go-gitlab v0.50.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 )
-
-replace github.com/xanzy/go-gitlab => github.com/etiennetremel/go-gitlab v0.49.1-0.20210506152720-85530398e40b

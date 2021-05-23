@@ -16,8 +16,8 @@ import (
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/fikaworks/ggate/pkg/platforms"
-	"github.com/fikaworks/ggate/pkg/workers"
+	"github.com/fikaworks/grgate/pkg/platforms"
+	"github.com/fikaworks/grgate/pkg/workers"
 )
 
 const (

@@ -6,8 +6,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/fikaworks/ggate/pkg/config"
-	"github.com/fikaworks/ggate/pkg/platforms"
+	"github.com/fikaworks/grgate/pkg/config"
+	"github.com/fikaworks/grgate/pkg/platforms"
 )
 
 // Job define information about the job to process

@@ -4,8 +4,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/fikaworks/ggate/pkg/config"
-	"github.com/fikaworks/ggate/pkg/server"
+	"github.com/fikaworks/grgate/pkg/config"
+	"github.com/fikaworks/grgate/pkg/server"
 )
 
 // serveCmd represents the serve command

@@ -1,6 +1,6 @@
 package main
 
-import "github.com/fikaworks/ggate/cmd"
+import "github.com/fikaworks/grgate/cmd"
 
 func main() {
 	cmd.Execute()

@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/xanzy/go-gitlab"
 
-	"github.com/fikaworks/ggate/pkg/utils"
+	"github.com/fikaworks/grgate/pkg/utils"
 )
 
 var (

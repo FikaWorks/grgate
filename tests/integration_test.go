@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	repositoryPrefix = "ggate-integration"
+	repositoryPrefix = "grgate-integration"
 )
 
 

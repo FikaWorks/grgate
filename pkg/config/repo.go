@@ -6,7 +6,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 
-	"github.com/fikaworks/ggate/pkg/platforms"
+	"github.com/fikaworks/grgate/pkg/platforms"
 )
 
 // NewRepoConfig returns configuration defined in a repository

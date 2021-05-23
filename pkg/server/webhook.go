@@ -3,8 +3,8 @@ package server
 import (
 	"github.com/rs/zerolog/log"
 
-	"github.com/fikaworks/ggate/pkg/platforms"
-	"github.com/fikaworks/ggate/pkg/workers"
+	"github.com/fikaworks/grgate/pkg/platforms"
+	"github.com/fikaworks/grgate/pkg/workers"
 )
 
 // WebhookHandler hold webhook configuration

@@ -7,8 +7,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/fikaworks/ggate/pkg/platforms"
-	"github.com/fikaworks/ggate/pkg/utils"
+	"github.com/fikaworks/grgate/pkg/platforms"
+	"github.com/fikaworks/grgate/pkg/utils"
 )
 
 type statusSetFlagsStruct struct {
@@ -26,11 +26,11 @@ var statusSetCmd = &cobra.Command{
 	Short: "Set a status to a given commit",
 	Long: `Examples:
   # set the e2e-happy-flow status to completed (github)
-  ggate status set --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e \
+  grgate status set --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e \
     --name e2e-happy-flow --status completed --state success
 
   # set the e2e-happy-flow status to success (gitlab)
-  ggate status set --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e \
+  grgate status set --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e \
     --name e2e-happy-flow --status success`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {

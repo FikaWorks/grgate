@@ -11,9 +11,9 @@ import (
 
 	"github.com/xanzy/go-gitlab"
 
-	"github.com/fikaworks/ggate/pkg/config"
-	"github.com/fikaworks/ggate/pkg/platforms"
-	"github.com/fikaworks/ggate/pkg/workers"
+	"github.com/fikaworks/grgate/pkg/config"
+	"github.com/fikaworks/grgate/pkg/platforms"
+	"github.com/fikaworks/grgate/pkg/workers"
 )
 
 type gitlabTest struct {
@@ -93,7 +93,7 @@ func TestGitlabReleases(t *testing.T) {
   }
 
   config.Main = &config.MainConfig{
-    RepoConfigPath: ".ggate.yaml",
+    RepoConfigPath: ".grgate.yaml",
     Globals: &config.RepoConfig{
       Enabled: true,
       TagRegexp: ".*",

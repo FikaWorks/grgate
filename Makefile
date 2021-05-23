@@ -1,7 +1,7 @@
 export DOCKER_BUILDKIT=1
 
-GGATE_VERSION=$(shell git rev-parse --short HEAD)
-DOCKER_IMAGE=fikaworks/ggate
+GRGATE_VERSION=$(shell git rev-parse --short HEAD)
+DOCKER_IMAGE=fikaworks/grgate
 
 .PHONY: \
 	all \
@@ -21,19 +21,19 @@ all: \
 	build
 
 build:
-	go build -ldflags="-X 'github.com/fikaworks/ggate/pkg/config.Version=$(GGATE_VERSION)'" -a -o ggate .
+	go build -ldflags="-X 'github.com/fikaworks/grgate/pkg/config.Version=$(GRGATE_VERSION)'" -a -o grgate .
 
 build-docker:
 	docker build \
 		--cache-from $(DOCKER_IMAGE) \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
-		--build-arg GGATE_VERSION=$(GGATE_VERSION) \
+		--build-arg GRGATE_VERSION=$(GRGATE_VERSION) \
 		-t $(DOCKER_IMAGE) .
 
 push-dockerhub: build-docker
-	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(GGATE_VERSION)
+	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(GRGATE_VERSION)
 	docker push $(DOCKER_IMAGE)
-	docker push $(DOCKER_IMAGE):$(GGATE_VERSION)
+	docker push $(DOCKER_IMAGE):$(GRGATE_VERSION)
 
 lint:
 	golangci-lint run

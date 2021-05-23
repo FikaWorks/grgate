@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/fikaworks/ggate/pkg/config"
+	"github.com/fikaworks/grgate/pkg/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
