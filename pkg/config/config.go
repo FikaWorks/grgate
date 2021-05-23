@@ -1,6 +1,9 @@
 package config
 
 var (
+	// CommitSha from source repository used to build GRGate
+	CommitSha string
+
 	// Main contains the generated main configuration
 	Main *MainConfig
 

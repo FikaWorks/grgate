@@ -1,6 +1,7 @@
 export DOCKER_BUILDKIT=1
 
-GRGATE_VERSION=$(shell git rev-parse --short HEAD)
+GRGATE_COMMITSHA=$(shell git rev-parse --short HEAD)
+GRGATE_VERSION=$(shell git describe --contains $(GRGATE_COMMITSHA))
 DOCKER_IMAGE=fikaworks/grgate
 
 .PHONY: \
@@ -21,12 +22,15 @@ all: \
 	build
 
 build:
-	go build -ldflags="-X 'github.com/fikaworks/grgate/pkg/config.Version=$(GRGATE_VERSION)'" -a -o grgate .
+	go build \
+	-ldflags="-X 'github.com/fikaworks/grgate/pkg/config.Version=$(GRGATE_VERSION)' -X 'github.com/fikaworks/grgate/pkg/config.CommitSha=$(GRGATE_COMMITSHA)'" \
+	-a -o grgate .
 
 build-docker:
 	docker build \
 		--cache-from $(DOCKER_IMAGE) \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--build-arg GRGATE_COMMITSHA=$(GRGATE_COMMITSHA) \
 		--build-arg GRGATE_VERSION=$(GRGATE_VERSION) \
 		-t $(DOCKER_IMAGE) .
 

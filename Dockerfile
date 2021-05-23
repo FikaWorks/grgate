@@ -1,10 +1,15 @@
 FROM golang:1.16-alpine AS build
+ARG GRGATE_COMMITSHA
 ARG GRGATE_VERSION
+RUN apk --no-cache add ca-certificates
 COPY . $GOPATH/src/app
 WORKDIR $GOPATH/src/app
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-X 'github.com/fikaworks/grgate/pkg/config.Version=$GRGATE_VERSION'" -a -installsuffix cgo -o grgate .
+RUN CGO_ENABLED=0 GOOS=linux go build \
+  -ldflags="-X 'github.com/fikaworks/grgate/pkg/config.Version=$GRGATE_VERSION' -X 'github.com/fikaworks/grgate/pkg/config.CommitSha=$GRGATE_COMMITSHA'" \
+  -a -installsuffix cgo -o grgate .
 
 FROM scratch
-COPY --from=build /go/src/app/grgate /grgate
+COPY --from=build /go/src/app/grgate /bin/grgate
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 EXPOSE 8080 8086 9101
-CMD ["/grgate", "serve"]
+CMD ["grgate", "serve"]

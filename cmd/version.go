@@ -12,7 +12,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version number of GRGate",
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Info().Msgf("Version %s", config.Version)
+		log.Info().Msgf("Version: %s, CommitSha: %s", config.Version, config.CommitSha)
 	},
 }
 
