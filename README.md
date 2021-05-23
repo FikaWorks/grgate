@@ -1,12 +1,14 @@
 GRGate - Git release gate
 =========================
 
-> **grgate**, is git release gate utility which autopublish draft/unpublished
+> **grgate**, a git release gate utility which autopublish draft/unpublished
 releases based on commit status (aka checks). It can be triggered automatically
 using Git webhook or directly from the CLI.
 
 Currently, only Github and Gitlab are supported, other provider could come in a
 near future.
+
+![grgate workflow](https://github.com/FikaWorks/grgate/actions/workflows/main.yml/badge.svg?branch=main)
 
 ## Overview
 
