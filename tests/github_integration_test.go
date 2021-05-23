@@ -162,17 +162,22 @@ func TestGithubReleases(t *testing.T) {
       return
 		}
 
-    release, _, err := client.Repositories.GetReleaseByTag(ctx, owner,
-      repository, rr.tag)
+		releaseList, _, err := client.Repositories.ListReleases(ctx, owner,
+      repository, nil)
 		if err != nil {
-			t.Error("Couldn't get release", err)
+			t.Error("Couldn't get releases", err)
 			return
 		}
 
-		if !*release.Draft {
-			t.Error("Release should not be published when status is not set")
-			return
+		// check that release hasn't been published, if still draft then the test
+    // is successful
+		for _, release := range releaseList {
+			if *release.TagName == rr.tag && *release.Draft {
+        return
+      }
 		}
+
+    t.Error("Release should not be published when status is not set")
   })
 
 	t.Run("should not publish release when some commit status are still running", func(t *testing.T) {
@@ -192,17 +197,22 @@ func TestGithubReleases(t *testing.T) {
 			return
 		}
 
-    release, _, err := client.Repositories.GetReleaseByTag(ctx, owner,
-      repository, rr.tag)
+		releaseList, _, err := client.Repositories.ListReleases(ctx, owner,
+      repository, nil)
 		if err != nil {
-			t.Error("Couldn't get release", err)
+			t.Error("Couldn't get releases", err)
 			return
 		}
 
-		if !*release.Draft {
-			t.Error("Release should not be published when the commit status are still running")
-			return
+		// check that release hasn't been published, if still draft then the test
+    // is successful
+		for _, release := range releaseList {
+			if *release.TagName == rr.tag && *release.Draft {
+        return
+      }
 		}
+
+    t.Error("Release should not be published when the commit status are still running")
   })
 
 	t.Run("should publish release if all status succeeded", func(t *testing.T) {
@@ -223,16 +233,20 @@ func TestGithubReleases(t *testing.T) {
 			return
 		}
 
-    release, _, err := client.Repositories.GetReleaseByTag(ctx, owner,
-      repository, rr.tag)
+		releaseList, _, err := client.Repositories.ListReleases(ctx, owner,
+      repository, nil)
 		if err != nil {
-			t.Error("Couldn't get release", err)
+			t.Error("Couldn't get releases", err)
 			return
 		}
 
-		if *release.Draft {
-      t.Error("Release wasn't published after all commit status succeeded", err)
-			return
+		// check that release has been published, if still draft then test failed
+		for _, release := range releaseList {
+			if *release.TagName == rr.tag && !*release.Draft {
+        return
+      }
 		}
+
+    t.Error("Release wasn't published after all commit status succeeded", err)
   })
 }
