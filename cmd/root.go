@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/rs/zerolog"
@@ -29,7 +30,7 @@ func init() {
 	flags := rootCmd.PersistentFlags()
 
 	flags.StringVarP(&cfgFile, "config", "c", "",
-		"config file (default is $HOME/.grgate.yaml)")
+		"config file (default is /etc/grgate/config.yaml)")
 	flags.Int64("github.appID", 0, "Github App ID")
 	flags.Int64("github.installationID", 0, "Github Installation ID")
 	flags.String("github.privateKeyPath", "", "Github private key path")
@@ -38,26 +39,38 @@ func init() {
 	flags.String("logLevel", "info", "Log level: trace, debug, info, warn,"+
 		"error, fatal or panic")
 	flags.String("logFormat", "pretty", "Log format: json or pretty")
-	flags.String("platform", "", "Platform to run against: github or gitlab"+
+	flags.String("platform", "github", "Platform to run against: github or gitlab"+
 		"(default: github)")
 }
 
 func initConfig() {
 	// read global config and override it with flags value
-	globalConfig, _ := config.NewGlobalConfig(cfgFile)
+	globalConfig, err := config.NewGlobalConfig(cfgFile)
+	if err != nil {
+		fmt.Print(err)
+		os.Exit(1)
+		return
+	}
 
 	if err := globalConfig.BindPFlags(rootCmd.PersistentFlags()); err != nil {
-		log.Error().Err(err)
+		fmt.Print(err)
+		os.Exit(1)
 		return
 	}
 
 	if err := globalConfig.Unmarshal(&config.Main); err != nil {
-		log.Error().Err(err)
+		fmt.Print(err)
+		os.Exit(1)
 		return
 	}
 
 	// logs
-	logLevel, _ := zerolog.ParseLevel(config.Main.LogLevel)
+	logLevel, err := zerolog.ParseLevel(config.Main.LogLevel)
+	if err != nil {
+		log.Error().Err(err)
+		return
+	}
+
 	zerolog.SetGlobalLevel(logLevel)
 
 	if config.Main.LogFormat == "pretty" {
