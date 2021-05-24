@@ -29,21 +29,38 @@ GRGate publish the Github release.
 
 Different terminology is used by different provider:
 
-- **Github** uses the term [draft releases][0] to prepare a release without
-publishing it.
-- **Gitlab** uses the term [upcoming releases][1], it is similar to Github
-Pre-releases where a badge notify the upcoming release in the Gitlab release
-page.  The attribute `released_at` should be set to a future date to have it
-enabled and it is only possible to change it using the Gitlab API.
+- **Github** uses the term [draft releases][draft-release] to prepare a release
+without publishing it.
+- **Gitlab** uses the term [upcoming releases][upcoming-release], it is similar
+to Github Pre-releases where a badge notify the upcoming release in the Gitlab
+release page.  The attribute `released_at` should be set to a future date to
+have it enabled and it is only possible to change it using the Gitlab API.
 
-[0]: https://docs.github.com/en/github/administering-a-repository/managing-releases-in-a-repository#about-release-management
-[1]: https://docs.gitlab.com/ee/api/releases/#upcoming-releases
+[draft-release]: https://docs.github.com/en/github/administering-a-repository/managing-releases-in-a-repository#about-release-management
+[upcoming-release]: https://docs.gitlab.com/ee/api/releases/#upcoming-releases
 
 ## Getting started
 
-Download latest release from the [release page][2].
+Create a Github APP or Gitlab token, then create a `config.yaml` or a
+`values.yaml` file if using Helm charts.
 
-[2]: https://github.com/fikaworks/grgate/releases
+### Helm chart
+
+A Helm chart is available in the [FikaWorks Helm charts
+repository][helm-charts].
+
+[helm-charts]: https://github.com/FikaWorks/helm-charts
+
+```bash
+$ helm repo add fikaworks https://fikaworks.github.io/helm-charts
+$ helm install --name grgate --f my-values.yaml fikaworks/grgate
+```
+
+### GRGate CLI
+
+Download latest release from the [release page][release-page].
+
+[release-page]: https://github.com/fikaworks/grgate/releases
 
 ```bash
 # check available commands
@@ -84,6 +101,9 @@ argument, by default it will try to read from `/etc/grgate/config.yaml`.
 ```yaml
 # global configuration, this is the default
 globals:
+  # enable GRGatem, if set to false release are not published
+  enabled: true
+
   # filter release by tag, the tag associated to the draft/unpublished releases
   # must match the regular expression defined by tagRegexp, default: .*
   tagRegexp: .*
