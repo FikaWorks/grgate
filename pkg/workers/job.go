@@ -44,7 +44,7 @@ func (j *Job) Process() error {
 	log.Info().
 		Str("repository", j.Repository).
 		Str("owner", j.Owner).
-		Msgf("Dry run: %t", j.Config.Enabled)
+		Msgf("Dry run: %t", !j.Config.Enabled)
 	log.Info().
 		Str("repository", j.Repository).
 		Str("owner", j.Owner).
