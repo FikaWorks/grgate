@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var repositoryRegexp = regexp.MustCompile(`^[a-zA-Z-_]*/[a-zA-Z-_]*$`)
+var repositoryRegexp = regexp.MustCompile(`^[a-zA-Z-_0-9.]*/[a-zA-Z-_0-9.]*$`)
 
 // IsValidRepositoryName returns true if the repository match the repository
 // regexp
@@ -20,5 +20,9 @@ func GetRepositoryOrganization(repository string) string {
 
 // GetRepositoryName returns the name of a given repository
 func GetRepositoryName(repository string) string {
-	return strings.Split(repository, "/")[1]
+	s := strings.Split(repository, "/")
+	if len(s) > 1 {
+		return s[1]
+	}
+	return ""
 }
