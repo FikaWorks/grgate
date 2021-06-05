@@ -20,9 +20,9 @@ func GetRepositoryOrganization(repository string) string {
 
 // GetRepositoryName returns the name of a given repository
 func GetRepositoryName(repository string) string {
-  s := strings.Split(repository, "/")
-  if len(s) > 1 {
-    return s[1]
-  }
+	s := strings.Split(repository, "/")
+	if len(s) > 1 {
+		return s[1]
+	}
 	return ""
 }
