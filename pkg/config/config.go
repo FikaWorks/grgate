@@ -11,10 +11,33 @@ var (
 	Version string
 )
 
+// PlatformType is the type of platform to run against (Github or Gitlab)
 type PlatformType string
 
 const (
+	// DefaultPlatform is the default platform
+	DefaultPlatform PlatformType = GithubPlatform
+
+	// DefaultRepoConfigPath is the default path of the .grgate config stored in
+	// the repository
+	DefaultRepoConfigPath string = ".grgate.yaml"
+
+	// DefaultServerListenAddress is the default main server listening address
+	DefaultServerListenAddress string = "0.0.0.0:8080"
+
+	// DefaultServerMetricsAddress is the default metric server listening address
+	DefaultServerMetricsAddress string = "0.0.0.0:9101"
+
+	// DefaultServerProbeAddress is the default probe server listening address
+	DefaultServerProbeAddress string = "0.0.0.0:8086"
+
+	// DefaultWorkers defined the default amount of workers
+	DefaultWorkers int = 5
+
+	// GithubPlatform represent the Github platform
 	GithubPlatform PlatformType = "github"
+
+	// GitlabPlatform represent the Gitlab platform
 	GitlabPlatform PlatformType = "gitlab"
 )
 
