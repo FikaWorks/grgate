@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/bradleyfalzon/ghinstallation"
+	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v34/github"
 )
 
