@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine AS build
+FROM golang:1.17-alpine AS build
 ARG GRGATE_COMMITSHA
 ARG GRGATE_VERSION
 RUN apk --no-cache add ca-certificates
