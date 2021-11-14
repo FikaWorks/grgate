@@ -37,6 +37,14 @@ jobs:
         with:
           version: v1.43
 
+      - name: codeql-init
+        uses: github/codeql-action/init@v1
+        with:
+          languages: go
+
+      - name: codeql-analyze
+        uses: github/codeql-action/analyze@v1
+
       - name: validate
         run: make validate
 
