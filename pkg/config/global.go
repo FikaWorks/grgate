@@ -18,14 +18,14 @@ func NewGlobalConfig(path string) (v *viper.Viper, err error) {
 	}
 
 	// Set defaults
-	v.SetDefault("platform", "github")
+	v.SetDefault("platform", DefaultPlatform)
 	v.SetDefault("globals.enabled", true)
 	v.SetDefault("globals.tagRegexp", ".*")
-	v.SetDefault("repoConfigPath", ".grgate.yaml")
-	v.SetDefault("server.listenAddress", "0.0.0.0:8080")
-	v.SetDefault("server.metricsAddress", "0.0.0.0:9101")
-	v.SetDefault("server.probeAddress", "0.0.0.0:8086")
-	v.SetDefault("workers", 5)
+	v.SetDefault("repoConfigPath", DefaultRepoConfigPath)
+	v.SetDefault("server.listenAddress", DefaultServerListenAddress)
+	v.SetDefault("server.metricsAddress", DefaultServerMetricsAddress)
+	v.SetDefault("server.probeAddress", DefaultServerProbeAddress)
+	v.SetDefault("workers", DefaultWorkers)
 
 	err = v.ReadInConfig()
 	if err != nil {

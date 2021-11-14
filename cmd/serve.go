@@ -44,11 +44,11 @@ func init() {
 
 	flags := serveCmd.PersistentFlags()
 
-	flags.String("server.listenAddress", "0.0.0.0:8080",
+	flags.String("server.listenAddress", config.DefaultServerListenAddress,
 		"The address to listen on for HTTP requests")
-	flags.String("server.metricsAddress", "0.0.0.0:9101",
+	flags.String("server.metricsAddress", config.DefaultServerMetricsAddress,
 		"The address to listen on for Prometheus metrics requests")
-	flags.String("server.probeAddress", "0.0.0.0:8086",
+	flags.String("server.probeAddress", config.DefaultServerProbeAddress,
 		"The address to listen on for probe requests")
-	flags.IntP("workers", "w", 5, "Number of workers to run")
+	flags.IntP("workers", "w", config.DefaultWorkers, "Number of workers to run")
 }
