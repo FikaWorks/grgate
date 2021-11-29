@@ -211,12 +211,14 @@ func TestProcess(t *testing.T) {
 
 <!-- GRGate start -->
 <details><summary>Status check</summary>
+
 - [x] e2e A
 - [ ] e2e B
 - [ ] e2e C
 - [ ] e2e D
 - [ ] e2e E
 - [ ] e2e F
+
 </details>
 <!-- GRGate end -->`
 
@@ -237,9 +239,11 @@ func TestProcess(t *testing.T) {
 
 <!-- GRGate start -->
 <details><summary>Status check</summary>
+
 {{- range .Statuses }}
 - [{{ if eq .Status "success" }}x{{ else }} {{ end }}] {{ .Name }}
 {{- end }}
+
 </details>
 <!-- GRGate end -->`,
 					},

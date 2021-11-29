@@ -25,9 +25,11 @@ func TestRenderReleaseNoteAppendStatuses(t *testing.T) {
 
 <!-- GRGate start -->
 <details><summary>Status check</summary>
+
 {{- range .Statuses }}
 - [{{ if eq .Status "success" }}x{{ else }} {{ end }}] {{ .Name }}
 {{- end }}
+
 </details>
 <!-- GRGate end -->`
 
@@ -35,8 +37,10 @@ func TestRenderReleaseNoteAppendStatuses(t *testing.T) {
 
 <!-- GRGate start -->
 <details><summary>Status check</summary>
+
 - [x] e2e A
 - [ ] e2e B
+
 </details>
 <!-- GRGate end -->`
 
@@ -55,8 +59,10 @@ func TestRenderReleaseNoteEditStatuses(t *testing.T) {
 
 <!-- GRGate start -->
 <details><summary>Status check</summary>
+
 - [ ] e2e A
 - [ ] e2e B
+
 </details>
 <!-- GRGate end -->`,
 		Statuses: []*platforms.Status{
@@ -75,9 +81,11 @@ func TestRenderReleaseNoteEditStatuses(t *testing.T) {
 
 <!-- GRGate start -->
 <details><summary>Status check</summary>
+
 {{- range .Statuses }}
 - [{{ if eq .Status "success" }}x{{ else }} {{ end }}] {{ .Name }}
 {{- end }}
+
 </details>
 <!-- GRGate end -->`
 
@@ -85,8 +93,10 @@ func TestRenderReleaseNoteEditStatuses(t *testing.T) {
 
 <!-- GRGate start -->
 <details><summary>Status check</summary>
+
 - [x] e2e A
 - [x] e2e B
+
 </details>
 <!-- GRGate end -->`
 
