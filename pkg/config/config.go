@@ -34,6 +34,26 @@ const (
 	// DefaultWorkers defined the default amount of workers
 	DefaultWorkers int = 5
 
+	// DefaultReleaseNoteMarkerStart is the string that define the start of the
+	// section appended to the release note
+	DefaultReleaseNoteMarkerStart string = "<!-- GRGate start -->"
+
+	// DefaultReleaseNoteMarkerEnd is the string that define the end of the
+	// section appended to the release note
+	DefaultReleaseNoteMarkerEnd string = "<!-- GRGate end -->"
+
+	// DefaultReleaseNoteTemplate define the default template used to display
+	// statuses in the release note
+	DefaultReleaseNoteTemplate string = `{{ .ReleaseNote }}
+
+<!-- GRGate start -->
+<details><summary>Status check</summary>
+{{- range .Statuses }}
+- [{{ if eq .Status "success" }}x{{ else }} {{ end }}] {{ .Name }}
+{{- end }}
+</details>
+<!-- GRGate end -->`
+
 	// GithubPlatform represent the Github platform
 	GithubPlatform PlatformType = "github"
 
@@ -52,6 +72,12 @@ type MainConfig struct {
 	RepoConfigPath string        `mapstructure:"repoConfigPath"`
 	Server         *Server       `mapstructure:"server"`
 	Workers        int           `mapstructure:"workers"`
+}
+
+// ReleaseNote define the release note configuration
+type ReleaseNote struct {
+	Enabled  bool   `mapstructure:"enabled"`
+	Template string `mapstructure:"template"`
 }
 
 // Server define server configuration
@@ -76,7 +102,8 @@ type Gitlab struct {
 
 // RepoConfig define repository configuration
 type RepoConfig struct {
-	Enabled   bool     `mapstructure:"enabled"`
-	TagRegexp string   `mapstructure:"tagRegexp"`
-	Statuses  []string `mapstructure:"statuses"`
+	Enabled     bool         `mapstructure:"enabled"`
+	ReleaseNote *ReleaseNote `mapstructure:"releaseNote"`
+	Statuses    []string     `mapstructure:"statuses"`
+	TagRegexp   string       `mapstructure:"tagRegexp"`
 }

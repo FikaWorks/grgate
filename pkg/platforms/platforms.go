@@ -12,6 +12,7 @@ type Platform interface {
 	ListReleases(string, string) ([]*Release, error)
 	ListStatuses(string, string, string) ([]*Status, error)
 	PublishRelease(string, string, interface{}) (bool, error)
+	UpdateRelease(string, string, interface{}, string) error
 	ReadFile(string, string, string) (io.Reader, error)
 }
 
@@ -31,6 +32,9 @@ type Release struct {
 
 	// Tag associated to the release
 	Tag string
+
+	// ReleaseNote attached to the release
+	ReleaseNote string
 }
 
 // Status contains commit status informations

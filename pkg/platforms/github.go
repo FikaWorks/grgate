@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
-	"github.com/google/go-github/v34/github"
+	"github.com/google/go-github/v41/github"
 )
 
 const (
@@ -75,16 +75,18 @@ func (p *githubPlatform) ListReleases(owner, repository string) (releases []*Rel
 			tag := *release.TagName
 			name := *release.Name
 			commit := *release.TargetCommitish
+			releaseNote := *release.Body
 
 			// TODO: if target commitish is branch, then get lastest commit from
 			// branch
 			if *release.Draft {
 				releases = append(releases, &Release{
-					ID:        id,
-					CommitSha: commit,
-					Name:      name,
-					Tag:       tag,
-					Platform:  "github",
+					ID:          id,
+					CommitSha:   commit,
+					Name:        name,
+					Tag:         tag,
+					ReleaseNote: releaseNote,
+					Platform:    "github",
 				})
 			}
 		}
@@ -97,6 +99,25 @@ func (p *githubPlatform) ListReleases(owner, repository string) (releases []*Rel
 	}
 
 	return releases, err
+}
+
+// UpdateRelease edit a release based on a provided releases ID and release note
+func (p *githubPlatform) UpdateRelease(owner, repository string, id interface{}, releaseNote string) (err error) {
+	release, _, err := p.client.Repositories.GetRelease(p.context, owner,
+		repository, id.(int64))
+	if err != nil {
+		return
+	}
+
+	release.Body = github.String(releaseNote)
+
+	_, _, err = p.client.Repositories.EditRelease(p.context, owner, repository,
+		id.(int64), release)
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 // PublishRelease publish a release based on a provided releases ID

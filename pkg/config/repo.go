@@ -32,6 +32,7 @@ func NewRepoConfig(platform platforms.Platform, owner, repository string) (confi
 
 	// Set defaults
 	v.SetDefault("Enabled", Main.Globals.Enabled)
+	v.SetDefault("ReleaseNote", Main.Globals.ReleaseNote)
 	v.SetDefault("Statuses", Main.Globals.Statuses)
 	v.SetDefault("TagRegexp", Main.Globals.TagRegexp)
 

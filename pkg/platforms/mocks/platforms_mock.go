@@ -138,3 +138,17 @@ func (mr *MockPlatformMockRecorder) ReadFile(arg0, arg1, arg2 interface{}) *gomo
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadFile", reflect.TypeOf((*MockPlatform)(nil).ReadFile), arg0, arg1, arg2)
 }
+
+// UpdateRelease mocks base method.
+func (m *MockPlatform) UpdateRelease(arg0, arg1 string, arg2 interface{}, arg3 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateRelease", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateRelease indicates an expected call of UpdateRelease.
+func (mr *MockPlatformMockRecorder) UpdateRelease(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRelease", reflect.TypeOf((*MockPlatform)(nil).UpdateRelease), arg0, arg1, arg2, arg3)
+}

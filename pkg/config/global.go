@@ -21,6 +21,8 @@ func NewGlobalConfig(path string) (v *viper.Viper, err error) {
 	v.SetDefault("platform", DefaultPlatform)
 	v.SetDefault("globals.enabled", true)
 	v.SetDefault("globals.tagRegexp", ".*")
+	v.SetDefault("globals.releaseNote.enabled", true)
+	v.SetDefault("globals.releaseNote.template", DefaultReleaseNoteTemplate)
 	v.SetDefault("repoConfigPath", DefaultRepoConfigPath)
 	v.SetDefault("server.listenAddress", DefaultServerListenAddress)
 	v.SetDefault("server.metricsAddress", DefaultServerMetricsAddress)

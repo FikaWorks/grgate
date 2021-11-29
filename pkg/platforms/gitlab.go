@@ -69,15 +69,17 @@ func (p *gitlabPlatform) ListReleases(owner, repository string) (releases []*Rel
 			tag := release.TagName
 			name := release.Name
 			commit := release.Commit.ID
+			releaseNote := release.Description
 
 			// If the release is in the future, then this is a "draft release"
 			if release.ReleasedAt.After(time.Now().UTC()) {
 				releases = append(releases, &Release{
-					CommitSha: commit,
-					Name:      name,
-					Platform:  "gitlab",
-					Tag:       tag,
-					ID:        tag,
+					CommitSha:   commit,
+					Name:        name,
+					Platform:    "gitlab",
+					Tag:         tag,
+					ReleaseNote: releaseNote,
+					ID:          tag,
 				})
 			}
 		}
@@ -90,6 +92,21 @@ func (p *gitlabPlatform) ListReleases(owner, repository string) (releases []*Rel
 	}
 
 	return releases, err
+}
+
+// UpdateRelease edit a release based on a provided releases ID and release note
+func (p *gitlabPlatform) UpdateRelease(owner, repository string, id interface{}, releaseNote string) (err error) {
+	opts := &gitlab.UpdateReleaseOptions{
+		Description: &releaseNote,
+	}
+
+	_, _, err = p.client.Releases.UpdateRelease(getPID(owner, repository),
+		id.(string), opts, nil)
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 // PublishRelease publish a release based on a provided release ID (tag name)
