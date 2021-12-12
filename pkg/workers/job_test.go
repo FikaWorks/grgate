@@ -1,9 +1,12 @@
+//go:build unit
+
 package workers
 
 import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/kylelemons/godebug/pretty"
 	"github.com/rs/zerolog"
 
 	"github.com/fikaworks/grgate/pkg/config"
@@ -207,8 +210,7 @@ func TestProcess(t *testing.T) {
 			mockPlatforms.EXPECT().UpdateRelease(gomock.Any(), gomock.Any(),
 				gomock.Any(), gomock.Any()).DoAndReturn(
 				func(_ string, _ string, _ interface{}, releaseNote string) error {
-					expected := `This is a release note
-
+					expectedReleaseNote := `This is a release note
 <!-- GRGate start -->
 <details><summary>Status check</summary>
 
@@ -222,9 +224,9 @@ func TestProcess(t *testing.T) {
 </details>
 <!-- GRGate end -->`
 
-					if releaseNote != expected {
-						t.Errorf("Expected release note to match %s, got %s", expected, releaseNote)
-					}
+          if diff := pretty.Compare(releaseNote, expectedReleaseNote); diff != "" {
+            t.Errorf("diff: (-got +want)\n%s", diff)
+          }
 					return nil
 				})
 
@@ -235,12 +237,10 @@ func TestProcess(t *testing.T) {
 					TagRegexp: ".*",
 					ReleaseNote: &config.ReleaseNote{
 						Enabled: true,
-						Template: `{{ .ReleaseNote }}
-
+						Template: `{{- .ReleaseNote }}
 <!-- GRGate start -->
 <details><summary>Status check</summary>
-
-{{- range .Statuses }}
+{{ range .Statuses }}
 - [{{ if eq .Status "success" }}x{{ else }} {{ end }}] {{ .Name }}
 {{- end }}
 

@@ -15,8 +15,40 @@ var (
 type PlatformType string
 
 const (
+	// DefaultEnabled is the default value which define if GRGate should process
+	// the repository or not
+	DefaultEnabled bool = true
+
+	// DefaultTagRegexp is the default pattern used to match tags attached to
+	// releases
+	DefaultTagRegexp string = ".*"
+
 	// DefaultPlatform is the default platform
 	DefaultPlatform PlatformType = GithubPlatform
+
+	// DefaultReleaseNoteEnabled define if the statuses should be added to the
+	// release note
+	DefaultReleaseNoteEnabled bool = true
+
+	// DefaultReleaseNoteMarkerStart is the string that define the start of the
+	// section appended to the release note
+	DefaultReleaseNoteMarkerStart string = "<!-- GRGate start -->"
+
+	// DefaultReleaseNoteMarkerEnd is the string that define the end of the
+	// section appended to the release note
+	DefaultReleaseNoteMarkerEnd string = "<!-- GRGate end -->"
+
+	// DefaultReleaseNoteTemplate define the default template used to display
+	// statuses in the release note
+	DefaultReleaseNoteTemplate string = `{{- .ReleaseNote -}}
+<!-- GRGate start -->
+<details><summary>Status check</summary>
+{{ range .Statuses }}
+- [{{ if or (eq .Status "completed" ) (eq .Status "success") }}x{{ else }} {{ end }}] {{ .Name }}
+{{- end }}
+
+</details>
+<!-- GRGate end -->`
 
 	// DefaultRepoConfigPath is the default path of the .grgate config stored in
 	// the repository
@@ -33,28 +65,6 @@ const (
 
 	// DefaultWorkers defined the default amount of workers
 	DefaultWorkers int = 5
-
-	// DefaultReleaseNoteMarkerStart is the string that define the start of the
-	// section appended to the release note
-	DefaultReleaseNoteMarkerStart string = "<!-- GRGate start -->"
-
-	// DefaultReleaseNoteMarkerEnd is the string that define the end of the
-	// section appended to the release note
-	DefaultReleaseNoteMarkerEnd string = "<!-- GRGate end -->"
-
-	// DefaultReleaseNoteTemplate define the default template used to display
-	// statuses in the release note
-	DefaultReleaseNoteTemplate string = `{{ .ReleaseNote }}
-
-<!-- GRGate start -->
-<details><summary>Status check</summary>
-
-{{- range .Statuses }}
-- [{{ if eq .Status "success" }}x{{ else }} {{ end }}] {{ .Name }}
-{{- end }}
-
-</details>
-<!-- GRGate end -->`
 
 	// GithubPlatform represent the Github platform
 	GithubPlatform PlatformType = "github"
@@ -76,20 +86,6 @@ type MainConfig struct {
 	Workers        int           `mapstructure:"workers"`
 }
 
-// ReleaseNote define the release note configuration
-type ReleaseNote struct {
-	Enabled  bool   `mapstructure:"enabled"`
-	Template string `mapstructure:"template"`
-}
-
-// Server define server configuration
-type Server struct {
-	ListenAddress  string `mapstructure:"listenAddress"`
-	MetricsAddress string `mapstructure:"metricsAddress"`
-	ProbeAddress   string `mapstructure:"probeAddress"`
-	WebhookSecret  string `mapstructure:"webhookSecret"`
-}
-
 // Github define Github configuration
 type Github struct {
 	AppID          int64  `mapstructure:"appID"`
@@ -102,10 +98,24 @@ type Gitlab struct {
 	Token string `mapstructure:"token"`
 }
 
+// ReleaseNote define the release note configuration
+type ReleaseNote struct {
+	Enabled  bool   `mapstructure:"enabled"`
+	Template string `mapstructure:"template"`
+}
+
 // RepoConfig define repository configuration
 type RepoConfig struct {
 	Enabled     bool         `mapstructure:"enabled"`
 	ReleaseNote *ReleaseNote `mapstructure:"releaseNote"`
 	Statuses    []string     `mapstructure:"statuses"`
 	TagRegexp   string       `mapstructure:"tagRegexp"`
+}
+
+// Server define server configuration
+type Server struct {
+	ListenAddress  string `mapstructure:"listenAddress"`
+	MetricsAddress string `mapstructure:"metricsAddress"`
+	ProbeAddress   string `mapstructure:"probeAddress"`
+	WebhookSecret  string `mapstructure:"webhookSecret"`
 }

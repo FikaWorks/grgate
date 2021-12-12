@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -34,11 +35,36 @@ func RenderReleaseNote(tpl string, data *ReleaseNoteData) (output string, err er
 	// if markers already exist, remove content and render the template so it
 	// looks like status check have been updated
 	if start > -1 && end > -1 {
-		data.ReleaseNote = strings.Trim(data.ReleaseNote[0:start]+data.ReleaseNote[end+len(releaseNoteMarkerEnd):], "\n")
+		data.ReleaseNote = data.ReleaseNote[0:start] + data.ReleaseNote[end+len(releaseNoteMarkerEnd):]
 	}
 
 	var b bytes.Buffer
 	err = t.Execute(&b, &data)
 	output = b.String()
 	return
+}
+
+// MergeStatuses based on the repo/global config
+func MergeStatuses(platformStatuses []*platforms.Status, configStatuses []string) []*platforms.Status {
+	for _, configStatus := range configStatuses {
+		present := false
+		for _, platformStatus := range platformStatuses {
+			if platformStatus.Name == configStatus {
+				present = true
+				break
+			}
+		}
+		if !present {
+			platformStatuses = append(platformStatuses, &platforms.Status{
+				Name: configStatus,
+			})
+		}
+	}
+
+	// sort status by name
+	sort.Slice(platformStatuses, func(i1, i2 int) bool {
+		return platformStatuses[i1].Name < platformStatuses[i2].Name
+	})
+
+	return platformStatuses
 }

@@ -121,7 +121,7 @@ func (j *Job) Process() error {
 				Str("releaseCommit", release.CommitSha).
 				Str("releaseTag", release.Tag).
 				Str("releaseName", release.Name).
-				Msg("Updating statuses list in release note")
+				Msg("Updating status list in release note")
 
 			statusList, err := j.Platform.ListStatuses(j.Owner, j.Repository,
 				release.CommitSha)
@@ -139,9 +139,9 @@ func (j *Job) Process() error {
 
 			releaseNoteData := &utils.ReleaseNoteData{
 				ReleaseNote: release.ReleaseNote,
-				Statuses:    statusList,
+				Statuses:    utils.MergeStatuses(statusList, j.Config.Statuses),
 			}
-			releaseNote, err := utils.RenderReleaseNote(j.Config.ReleaseNote.Template,
+			release.ReleaseNote, err = utils.RenderReleaseNote(j.Config.ReleaseNote.Template,
 				releaseNoteData)
 			if err != nil {
 				log.Error().
@@ -154,9 +154,9 @@ func (j *Job) Process() error {
 					Msg("Couldn't render release note")
 				return err
 			}
+
 			if j.Config.Enabled {
-				err = j.Platform.UpdateRelease(j.Owner, j.Repository, release.ID,
-					releaseNote)
+				err = j.Platform.UpdateRelease(j.Owner, j.Repository, release)
 				if err != nil {
 					log.Error().
 						Err(err).
@@ -207,7 +207,7 @@ func (j *Job) Process() error {
 				Str("releaseName", release.Name).
 				Msg("All required status succeeded, publishing release...")
 
-			_, err := j.Platform.PublishRelease(j.Owner, j.Repository, release.ID)
+			_, err := j.Platform.PublishRelease(j.Owner, j.Repository, release)
 			if err != nil {
 				log.Error().
 					Err(err).

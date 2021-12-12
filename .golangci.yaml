@@ -44,9 +44,15 @@ issues:
         - errcheck
       text: MarkFlagRequired
     - linters:
+        - dupl
         - funlen
-      source: Process
+        - gosec
+      path: _test\.go
     - linters:
         - dupl
-      path: _test\.go
-
+        - funlen
+        - gosec
+      path: tests/
+    - linters:
+        - funlen
+      path: pkg/workers/job.go

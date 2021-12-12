@@ -10,8 +10,13 @@ import (
 )
 
 const (
-	// number of items per page to retrieve via the Gitlab API
+	// default number of items per page to retrieve via the Gitlab API
 	gitlabePerPage int = 100
+
+	// default number of hours to set a future release to (aka draft release)
+	// Gitlab doesn't distinguish between draft and published release but use
+	// release date
+	futureReleaseTime time.Duration = time.Hour * 24 * 365
 )
 
 // GitlabConfig hold the Gitlab configuration
@@ -66,22 +71,18 @@ func (p *gitlabPlatform) ListReleases(owner, repository string) (releases []*Rel
 		}
 
 		for _, release := range releaseList {
-			tag := release.TagName
-			name := release.Name
-			commit := release.Commit.ID
-			releaseNote := release.Description
+			// if the release is in the future, then this is a "draft release"
+			draft := release.ReleasedAt.After(time.Now().UTC())
 
-			// If the release is in the future, then this is a "draft release"
-			if release.ReleasedAt.After(time.Now().UTC()) {
-				releases = append(releases, &Release{
-					CommitSha:   commit,
-					Name:        name,
-					Platform:    "gitlab",
-					Tag:         tag,
-					ReleaseNote: releaseNote,
-					ID:          tag,
-				})
-			}
+			releases = append(releases, &Release{
+				CommitSha:   release.Commit.ID,
+				ID:          release.TagName,
+				Name:        release.Name,
+				Platform:    "gitlab",
+				ReleaseNote: release.Description,
+				Tag:         release.TagName,
+				Published:   !draft,
+			})
 		}
 
 		if resp.CurrentPage >= resp.TotalPages {
@@ -95,13 +96,21 @@ func (p *gitlabPlatform) ListReleases(owner, repository string) (releases []*Rel
 }
 
 // UpdateRelease edit a release based on a provided releases ID and release note
-func (p *gitlabPlatform) UpdateRelease(owner, repository string, id interface{}, releaseNote string) (err error) {
+func (p *gitlabPlatform) UpdateRelease(owner, repository string, release *Release) (err error) {
+	r, _, err := p.client.Releases.GetRelease(getPID(owner, repository),
+		release.ID.(string), nil)
+	if err != nil {
+		return
+	}
+
 	opts := &gitlab.UpdateReleaseOptions{
-		Description: &releaseNote,
+		Description: &release.ReleaseNote,
+		Name:        &release.Name,
+		ReleasedAt:  r.ReleasedAt,
 	}
 
 	_, _, err = p.client.Releases.UpdateRelease(getPID(owner, repository),
-		id.(string), opts, nil)
+		release.ID.(string), opts, nil)
 	if err != nil {
 		return
 	}
@@ -109,16 +118,18 @@ func (p *gitlabPlatform) UpdateRelease(owner, repository string, id interface{},
 	return
 }
 
-// PublishRelease publish a release based on a provided release ID (tag name)
-func (p *gitlabPlatform) PublishRelease(owner, repository string, id interface{}) (published bool, err error) {
+// PublishRelease publish a release
+func (p *gitlabPlatform) PublishRelease(owner, repository string, release *Release) (published bool, err error) {
 	releasedAt := time.Now().UTC()
 
 	opts := &gitlab.UpdateReleaseOptions{
-		ReleasedAt: &releasedAt,
+		ReleasedAt:  &releasedAt,
+		Description: &release.ReleaseNote,
+		Name:        &release.Name,
 	}
 
 	_, _, err = p.client.Releases.UpdateRelease(getPID(owner, repository),
-		id.(string), opts, nil)
+		release.ID.(string), opts, nil)
 	if err != nil {
 		return
 	}
@@ -131,7 +142,7 @@ func (p *gitlabPlatform) PublishRelease(owner, repository string, id interface{}
 func (p *gitlabPlatform) CheckAllStatusSucceeded(owner, repository,
 	commitSha string, statuses []string) (succeeded bool, err error) {
 	if len(statuses) == 0 {
-		return
+		return true, nil
 	}
 
 	opts := &gitlab.GetCommitStatusesOptions{
@@ -152,7 +163,7 @@ func (p *gitlabPlatform) CheckAllStatusSucceeded(owner, repository,
 		succeededStatus := 0
 		for _, commitStatus := range commitStatuses {
 			for _, status := range statuses {
-				if commitStatus.Name == status && commitStatus.Status == "success" {
+				if commitStatus.Name == status && commitStatus.Status == successStatusValue {
 					succeededStatus++
 				}
 			}
@@ -170,16 +181,65 @@ func (p *gitlabPlatform) CheckAllStatusSucceeded(owner, repository,
 	return succeeded, err
 }
 
+// CreateFile create a file with content at a given path
+func (p *gitlabPlatform) CreateFile(owner, repository, path, branch, commitMessage, body string) (err error) {
+	opts := &gitlab.CreateFileOptions{
+		Branch:        &branch,
+		Content:       &body,
+		CommitMessage: &commitMessage,
+	}
+	_, _, err = p.client.RepositoryFiles.CreateFile(getPID(owner, repository), path, opts, nil)
+	return
+}
+
+// CreateRelease create a release
+func (p *gitlabPlatform) CreateRelease(owner, repository string, release *Release) (err error) {
+	opts := &gitlab.CreateReleaseOptions{
+		Name:        &release.Name,
+		Ref:         &release.CommitSha,
+		TagName:     &release.Tag,
+		Description: &release.ReleaseNote,
+	}
+
+	if !release.Published {
+		// if draft release, set releasedAt to 1 year from now
+		future := time.Now().UTC().Add(futureReleaseTime)
+		opts.ReleasedAt = &future
+	}
+
+	_, _, err = p.client.Releases.CreateRelease(getPID(owner, repository), opts, nil)
+	return
+}
+
+// CreateRepository create a repository
+func (p *gitlabPlatform) CreateRepository(owner, repository, visibility string) (err error) {
+	opts := &gitlab.CreateProjectOptions{
+		Name:       gitlab.String(repository),
+		Visibility: gitlab.Visibility(gitlab.VisibilityValue(visibility)),
+	}
+	_, _, err = p.client.Projects.CreateProject(opts, nil)
+	return
+}
+
 // CreateStatus for a given commit
 func (p *gitlabPlatform) CreateStatus(owner, repository string, status *Status) (err error) {
+	// safely map Github to Gitlab state
+	state := mapGithubStatusToGitlabStatus(status.Status)
+
 	opts := &gitlab.SetCommitStatusOptions{
-		State: *gitlab.BuildState(gitlab.BuildStateValue(status.Status)),
+		State: *gitlab.BuildState(gitlab.BuildStateValue(state)),
 		Name:  &status.Name,
 	}
 
 	_, _, err = p.client.Commits.SetCommitStatus(getPID(owner, repository),
 		status.CommitSha, opts, nil)
 
+	return
+}
+
+// DeleteRepository delete a repository
+func (p *gitlabPlatform) DeleteRepository(owner, repository string) (err error) {
+	_, err = p.client.Projects.DeleteProject(getPID(owner, repository), nil)
 	return
 }
 

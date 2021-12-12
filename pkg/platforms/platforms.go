@@ -4,16 +4,23 @@ import (
 	"io"
 )
 
+// Success status value
+const successStatusValue = "success"
+
 // Platform interface Github and Gitlab
 type Platform interface {
 	CheckAllStatusSucceeded(string, string, string, []string) (bool, error)
+	CreateFile(string, string, string, string, string, string) error
+	CreateRelease(string, string, *Release) error
+	CreateRepository(string, string, string) error
 	CreateStatus(string, string, *Status) error
+	DeleteRepository(string, string) error
 	GetStatus(string, string, string, string) (*Status, error)
 	ListReleases(string, string) ([]*Release, error)
 	ListStatuses(string, string, string) ([]*Status, error)
-	PublishRelease(string, string, interface{}) (bool, error)
-	UpdateRelease(string, string, interface{}, string) error
+	PublishRelease(string, string, *Release) (bool, error)
 	ReadFile(string, string, string) (io.Reader, error)
+	UpdateRelease(string, string, *Release) error
 }
 
 // Release represent a release regarding the platform
@@ -35,6 +42,10 @@ type Release struct {
 
 	// ReleaseNote attached to the release
 	ReleaseNote string
+
+	// Published represent the state of the release. For Github it translates to
+	// draft. For Gitlab it translates to a future release
+	Published bool
 }
 
 // Status contains commit status informations
