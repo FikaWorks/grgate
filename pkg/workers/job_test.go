@@ -208,8 +208,8 @@ func TestProcess(t *testing.T) {
 				})
 
 			mockPlatforms.EXPECT().UpdateRelease(gomock.Any(), gomock.Any(),
-				gomock.Any(), gomock.Any()).DoAndReturn(
-				func(_ string, _ string, _ interface{}, releaseNote string) error {
+				gomock.Any()).DoAndReturn(
+				func(_ string, _ string, release *platforms.Release) error {
 					expectedReleaseNote := `This is a release note
 <!-- GRGate start -->
 <details><summary>Status check</summary>
@@ -224,7 +224,7 @@ func TestProcess(t *testing.T) {
 </details>
 <!-- GRGate end -->`
 
-          if diff := pretty.Compare(releaseNote, expectedReleaseNote); diff != "" {
+          if diff := pretty.Compare(release.ReleaseNote, expectedReleaseNote); diff != "" {
             t.Errorf("diff: (-got +want)\n%s", diff)
           }
 					return nil
