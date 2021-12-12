@@ -166,7 +166,7 @@ func (mr *MockPlatformMockRecorder) ListStatuses(arg0, arg1, arg2 interface{}) *
 }
 
 // PublishRelease mocks base method.
-func (m *MockPlatform) PublishRelease(arg0, arg1 string, arg2 interface{}) (bool, error) {
+func (m *MockPlatform) PublishRelease(arg0, arg1 string, arg2 *platforms.Release) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PublishRelease", arg0, arg1, arg2)
 	ret0, _ := ret[0].(bool)
@@ -195,30 +195,16 @@ func (mr *MockPlatformMockRecorder) ReadFile(arg0, arg1, arg2 interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadFile", reflect.TypeOf((*MockPlatform)(nil).ReadFile), arg0, arg1, arg2)
 }
 
-// UpdateFile mocks base method.
-func (m *MockPlatform) UpdateFile(arg0, arg1, arg2, arg3, arg4, arg5 string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateFile", arg0, arg1, arg2, arg3, arg4, arg5)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateFile indicates an expected call of UpdateFile.
-func (mr *MockPlatformMockRecorder) UpdateFile(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockPlatform)(nil).UpdateFile), arg0, arg1, arg2, arg3, arg4, arg5)
-}
-
 // UpdateRelease mocks base method.
-func (m *MockPlatform) UpdateRelease(arg0, arg1 string, arg2 interface{}, arg3 string) error {
+func (m *MockPlatform) UpdateRelease(arg0, arg1 string, arg2 *platforms.Release) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateRelease", arg0, arg1, arg2, arg3)
+	ret := m.ctrl.Call(m, "UpdateRelease", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateRelease indicates an expected call of UpdateRelease.
-func (mr *MockPlatformMockRecorder) UpdateRelease(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+func (mr *MockPlatformMockRecorder) UpdateRelease(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRelease", reflect.TypeOf((*MockPlatform)(nil).UpdateRelease), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRelease", reflect.TypeOf((*MockPlatform)(nil).UpdateRelease), arg0, arg1, arg2)
 }
