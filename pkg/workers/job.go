@@ -8,6 +8,7 @@ import (
 
 	"github.com/fikaworks/grgate/pkg/config"
 	"github.com/fikaworks/grgate/pkg/platforms"
+	"github.com/fikaworks/grgate/pkg/utils"
 )
 
 // Job define information about the job to process
@@ -106,8 +107,76 @@ func (j *Job) Process() error {
 				Err(err).
 				Str("owner", j.Owner).
 				Str("repository", j.Repository).
+				Str("releaseCommit", release.CommitSha).
+				Str("releaseTag", release.Tag).
+				Str("releaseName", release.Name).
 				Msg("Couldn't check all status check")
 			return err
+		}
+
+		if j.Config.ReleaseNote.Enabled {
+			log.Info().
+				Str("repository", j.Repository).
+				Str("owner", j.Owner).
+				Str("releaseCommit", release.CommitSha).
+				Str("releaseTag", release.Tag).
+				Str("releaseName", release.Name).
+				Msg("Updating status list in release note")
+
+			statusList, err := j.Platform.ListStatuses(j.Owner, j.Repository,
+				release.CommitSha)
+			if err != nil {
+				log.Error().
+					Err(err).
+					Str("owner", j.Owner).
+					Str("repository", j.Repository).
+					Str("releaseCommit", release.CommitSha).
+					Str("releaseTag", release.Tag).
+					Str("releaseName", release.Name).
+					Msg("Couldn't list release statuses")
+				return err
+			}
+
+			releaseNoteData := &utils.ReleaseNoteData{
+				ReleaseNote: release.ReleaseNote,
+				Statuses:    utils.MergeStatuses(statusList, j.Config.Statuses),
+			}
+			release.ReleaseNote, err = utils.RenderReleaseNote(j.Config.ReleaseNote.Template,
+				releaseNoteData)
+			if err != nil {
+				log.Error().
+					Err(err).
+					Str("owner", j.Owner).
+					Str("repository", j.Repository).
+					Str("releaseCommit", release.CommitSha).
+					Str("releaseTag", release.Tag).
+					Str("releaseName", release.Name).
+					Msg("Couldn't render release note")
+				return err
+			}
+
+			if j.Config.Enabled {
+				err = j.Platform.UpdateRelease(j.Owner, j.Repository, release)
+				if err != nil {
+					log.Error().
+						Err(err).
+						Str("owner", j.Owner).
+						Str("repository", j.Repository).
+						Str("releaseCommit", release.CommitSha).
+						Str("releaseTag", release.Tag).
+						Str("releaseName", release.Name).
+						Msg("Couldn't update release")
+					return err
+				}
+			} else {
+				log.Info().
+					Str("repository", j.Repository).
+					Str("owner", j.Owner).
+					Str("releaseCommit", release.CommitSha).
+					Str("releaseTag", release.Tag).
+					Str("releaseName", release.Name).
+					Msgf("Would update release note with statuses [dry-run]")
+			}
 		}
 
 		log.Trace().
@@ -138,12 +207,15 @@ func (j *Job) Process() error {
 				Str("releaseName", release.Name).
 				Msg("All required status succeeded, publishing release...")
 
-			_, err := j.Platform.PublishRelease(j.Owner, j.Repository, release.ID)
+			_, err := j.Platform.PublishRelease(j.Owner, j.Repository, release)
 			if err != nil {
 				log.Error().
 					Err(err).
 					Str("owner", j.Owner).
 					Str("repository", j.Repository).
+					Str("releaseCommit", release.CommitSha).
+					Str("releaseTag", release.Tag).
+					Str("releaseName", release.Name).
 					Msg("Couldn't publish release")
 				return err
 			}

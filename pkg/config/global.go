@@ -18,9 +18,11 @@ func NewGlobalConfig(path string) (v *viper.Viper, err error) {
 	}
 
 	// Set defaults
+	v.SetDefault("globals.enabled", DefaultEnabled)
+	v.SetDefault("globals.releaseNote.enabled", DefaultReleaseNoteEnabled)
+	v.SetDefault("globals.releaseNote.template", DefaultReleaseNoteTemplate)
+	v.SetDefault("globals.tagRegexp", DefaultTagRegexp)
 	v.SetDefault("platform", DefaultPlatform)
-	v.SetDefault("globals.enabled", true)
-	v.SetDefault("globals.tagRegexp", ".*")
 	v.SetDefault("repoConfigPath", DefaultRepoConfigPath)
 	v.SetDefault("server.listenAddress", DefaultServerListenAddress)
 	v.SetDefault("server.metricsAddress", DefaultServerMetricsAddress)
@@ -29,9 +31,11 @@ func NewGlobalConfig(path string) (v *viper.Viper, err error) {
 
 	err = v.ReadInConfig()
 	if err != nil {
-		return
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			// config file not found, use fallback to default config
+			return
+		}
 	}
 
-	err = v.Unmarshal(&Main)
-	return
+	return v, v.Unmarshal(&Main)
 }

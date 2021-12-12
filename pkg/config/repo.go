@@ -31,9 +31,11 @@ func NewRepoConfig(platform platforms.Platform, owner, repository string) (confi
 	v.SetConfigType("yaml")
 
 	// Set defaults
-	v.SetDefault("Enabled", Main.Globals.Enabled)
-	v.SetDefault("Statuses", Main.Globals.Statuses)
-	v.SetDefault("TagRegexp", Main.Globals.TagRegexp)
+	v.SetDefault("enabled", Main.Globals.Enabled)
+	v.SetDefault("releaseNote.enabled", Main.Globals.ReleaseNote.Enabled)
+	v.SetDefault("releaseNote.template", Main.Globals.ReleaseNote.Template)
+	v.SetDefault("statuses", Main.Globals.Statuses)
+	v.SetDefault("tagRegexp", Main.Globals.TagRegexp)
 
 	if err = v.ReadConfig(cfg); err != nil {
 		return

@@ -112,6 +112,20 @@ globals:
   statuses:
     - e2e happy flow
 
+  # append statuses to release note
+  releaseNote:
+    enabled: true
+    template: |-
+      {{- .ReleaseNote -}}
+      <!-- GRGate start -->
+      <details><summary>Status check</summary>
+      {{ range .Statuses }}
+      - [{{ if or (eq .Status "completed" ) (eq .Status "success") }}x{{ else }} {{ end }}] {{ .Name }}
+      {{- end }}
+
+      </details>
+      <!-- GRGate end -->
+
 # server configuration (webhook)
 # webhook should be sent to /<provider>/webhook, where provider is either
 # github or gitlab
@@ -258,6 +272,20 @@ $ make mocks
 
 Run integration tests against all platforms. The tests create temporary
 repositories and run a series of tests against them.
+
+#### Prerequisite
+
+Create a Gitlab personnal access token with the following scopes:
+- `api`
+- `read_api`
+- `write_repository`
+
+Create a Github personnal access token with the following scopes:
+- `api`
+- `read_api`
+- `write_repository`
+
+#### Run integration tests
 
 ```bash
 $ export GITLAB_OWNER=<gitlab repository owner>

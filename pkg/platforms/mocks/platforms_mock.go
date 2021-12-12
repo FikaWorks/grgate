@@ -50,6 +50,48 @@ func (mr *MockPlatformMockRecorder) CheckAllStatusSucceeded(arg0, arg1, arg2, ar
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckAllStatusSucceeded", reflect.TypeOf((*MockPlatform)(nil).CheckAllStatusSucceeded), arg0, arg1, arg2, arg3)
 }
 
+// CreateFile mocks base method.
+func (m *MockPlatform) CreateFile(arg0, arg1, arg2, arg3, arg4, arg5 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateFile", arg0, arg1, arg2, arg3, arg4, arg5)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateFile indicates an expected call of CreateFile.
+func (mr *MockPlatformMockRecorder) CreateFile(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFile", reflect.TypeOf((*MockPlatform)(nil).CreateFile), arg0, arg1, arg2, arg3, arg4, arg5)
+}
+
+// CreateRelease mocks base method.
+func (m *MockPlatform) CreateRelease(arg0, arg1 string, arg2 *platforms.Release) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateRelease", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateRelease indicates an expected call of CreateRelease.
+func (mr *MockPlatformMockRecorder) CreateRelease(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRelease", reflect.TypeOf((*MockPlatform)(nil).CreateRelease), arg0, arg1, arg2)
+}
+
+// CreateRepository mocks base method.
+func (m *MockPlatform) CreateRepository(arg0, arg1, arg2 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateRepository", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateRepository indicates an expected call of CreateRepository.
+func (mr *MockPlatformMockRecorder) CreateRepository(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRepository", reflect.TypeOf((*MockPlatform)(nil).CreateRepository), arg0, arg1, arg2)
+}
+
 // CreateStatus mocks base method.
 func (m *MockPlatform) CreateStatus(arg0, arg1 string, arg2 *platforms.Status) error {
 	m.ctrl.T.Helper()
@@ -62,6 +104,20 @@ func (m *MockPlatform) CreateStatus(arg0, arg1 string, arg2 *platforms.Status) e
 func (mr *MockPlatformMockRecorder) CreateStatus(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStatus", reflect.TypeOf((*MockPlatform)(nil).CreateStatus), arg0, arg1, arg2)
+}
+
+// DeleteRepository mocks base method.
+func (m *MockPlatform) DeleteRepository(arg0, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteRepository", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteRepository indicates an expected call of DeleteRepository.
+func (mr *MockPlatformMockRecorder) DeleteRepository(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRepository", reflect.TypeOf((*MockPlatform)(nil).DeleteRepository), arg0, arg1)
 }
 
 // GetStatus mocks base method.
@@ -110,7 +166,7 @@ func (mr *MockPlatformMockRecorder) ListStatuses(arg0, arg1, arg2 interface{}) *
 }
 
 // PublishRelease mocks base method.
-func (m *MockPlatform) PublishRelease(arg0, arg1 string, arg2 interface{}) (bool, error) {
+func (m *MockPlatform) PublishRelease(arg0, arg1 string, arg2 *platforms.Release) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PublishRelease", arg0, arg1, arg2)
 	ret0, _ := ret[0].(bool)
@@ -137,4 +193,18 @@ func (m *MockPlatform) ReadFile(arg0, arg1, arg2 string) (io.Reader, error) {
 func (mr *MockPlatformMockRecorder) ReadFile(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadFile", reflect.TypeOf((*MockPlatform)(nil).ReadFile), arg0, arg1, arg2)
+}
+
+// UpdateRelease mocks base method.
+func (m *MockPlatform) UpdateRelease(arg0, arg1 string, arg2 *platforms.Release) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateRelease", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateRelease indicates an expected call of UpdateRelease.
+func (mr *MockPlatformMockRecorder) UpdateRelease(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRelease", reflect.TypeOf((*MockPlatform)(nil).UpdateRelease), arg0, arg1, arg2)
 }

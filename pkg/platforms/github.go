@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
-	"github.com/google/go-github/v34/github"
+	"github.com/google/go-github/v41/github"
 )
 
 const (
@@ -75,18 +75,24 @@ func (p *githubPlatform) ListReleases(owner, repository string) (releases []*Rel
 			tag := *release.TagName
 			name := *release.Name
 			commit := *release.TargetCommitish
+			draft := *release.Draft
+
+			var releaseNote string
+			if release.Body != nil {
+				releaseNote = *release.Body
+			}
 
 			// TODO: if target commitish is branch, then get lastest commit from
 			// branch
-			if *release.Draft {
-				releases = append(releases, &Release{
-					ID:        id,
-					CommitSha: commit,
-					Name:      name,
-					Tag:       tag,
-					Platform:  "github",
-				})
-			}
+			releases = append(releases, &Release{
+				CommitSha:   commit,
+				ID:          id,
+				Name:        name,
+				Platform:    "github",
+				ReleaseNote: releaseNote,
+				Tag:         tag,
+				Published:   !draft,
+			})
 		}
 
 		if resp.NextPage == 0 {
@@ -99,18 +105,37 @@ func (p *githubPlatform) ListReleases(owner, repository string) (releases []*Rel
 	return releases, err
 }
 
-// PublishRelease publish a release based on a provided releases ID
-func (p *githubPlatform) PublishRelease(owner, repository string, id interface{}) (published bool, err error) {
-	release, _, err := p.client.Repositories.GetRelease(p.context, owner,
-		repository, id.(int64))
+// UpdateRelease edit a release based on a provided releases ID and release note
+func (p *githubPlatform) UpdateRelease(owner, repository string, release *Release) (err error) {
+	r, _, err := p.client.Repositories.GetRelease(p.context, owner,
+		repository, release.ID.(int64))
 	if err != nil {
 		return
 	}
 
-	release.Draft = github.Bool(false)
+	r.Body = github.String(release.ReleaseNote)
 
 	_, _, err = p.client.Repositories.EditRelease(p.context, owner, repository,
-		id.(int64), release)
+		release.ID.(int64), r)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// PublishRelease publish a release
+func (p *githubPlatform) PublishRelease(owner, repository string, release *Release) (published bool, err error) {
+	r, _, err := p.client.Repositories.GetRelease(p.context, owner, repository,
+		release.ID.(int64))
+	if err != nil {
+		return
+	}
+
+	r.Draft = github.Bool(false)
+
+	_, _, err = p.client.Repositories.EditRelease(p.context, owner, repository,
+		release.ID.(int64), r)
 	if err != nil {
 		return
 	}
@@ -123,7 +148,7 @@ func (p *githubPlatform) PublishRelease(owner, repository string, id interface{}
 func (p *githubPlatform) CheckAllStatusSucceeded(owner, repository,
 	commitSha string, statuses []string) (succeeded bool, err error) {
 	if len(statuses) == 0 {
-		return
+		return true, nil
 	}
 
 	opts := &github.ListCheckRunsOptions{
@@ -144,7 +169,7 @@ func (p *githubPlatform) CheckAllStatusSucceeded(owner, repository,
 		// TODO: make sure all values in statuses are unique
 		for _, check := range getCheckRun.CheckRuns {
 			for _, status := range statuses {
-				if *check.Name == status && check.Conclusion != nil && *check.Conclusion == "success" {
+				if *check.Name == status && check.Conclusion != nil && *check.Conclusion == successStatusValue {
 					succeededCheck++
 				}
 			}
@@ -162,7 +187,43 @@ func (p *githubPlatform) CheckAllStatusSucceeded(owner, repository,
 	return succeeded, err
 }
 
-// GetStatus returns the status of a specific commit matching a provided status name
+// CreateFile create a file with content at a given path
+func (p *githubPlatform) CreateFile(owner, repository, path, branch, commitMessage, body string) (err error) {
+	opts := &github.RepositoryContentFileOptions{
+		Branch:  github.String(branch),
+		Content: []byte(body),
+		Message: github.String(commitMessage),
+	}
+
+	_, _, err = p.client.Repositories.CreateFile(p.context, owner, repository, path, opts)
+
+	return
+}
+
+// CreateRelease create a release
+func (p *githubPlatform) CreateRelease(owner, repository string, release *Release) (err error) {
+	opts := &github.RepositoryRelease{
+		Name:            github.String(release.Name),
+		TargetCommitish: github.String(release.CommitSha),
+		TagName:         github.String(release.Tag),
+		Draft:           github.Bool(!release.Published),
+		Body:            github.String(release.ReleaseNote),
+	}
+	_, _, err = p.client.Repositories.CreateRelease(p.context, owner, repository, opts)
+	return
+}
+
+// CreateRepository create a repository
+func (p *githubPlatform) CreateRepository(owner, repository, visibility string) (err error) {
+	opts := &github.Repository{
+		Name:       github.String(repository),
+		Visibility: github.String(visibility),
+	}
+	_, _, err = p.client.Repositories.Create(p.context, owner, opts)
+	return
+}
+
+// CreateStatus returns the status of a specific commit matching a provided status name
 func (p *githubPlatform) CreateStatus(owner, repository string, status *Status) (err error) {
 	opts := github.CreateCheckRunOptions{
 		Name:      status.Name,
@@ -177,6 +238,12 @@ func (p *githubPlatform) CreateStatus(owner, repository string, status *Status) 
 
 	_, _, err = p.client.Checks.CreateCheckRun(p.context, owner, repository, opts)
 
+	return
+}
+
+// DeleteRepository delete a repository
+func (p *githubPlatform) DeleteRepository(owner, repository string) (err error) {
+	_, err = p.client.Repositories.Delete(p.context, owner, repository)
 	return
 }
 
