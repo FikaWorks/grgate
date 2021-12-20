@@ -65,11 +65,12 @@ func (mr *MockPlatformMockRecorder) CreateFile(arg0, arg1, arg2, arg3, arg4, arg
 }
 
 // CreateRelease mocks base method.
-func (m *MockPlatform) CreateRelease(arg0, arg1 string, arg2 *platforms.Release) error {
+func (m *MockPlatform) CreateRelease(arg0, arg1 string, arg2 *platforms.Release) (*platforms.Release, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateRelease", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*platforms.Release)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CreateRelease indicates an expected call of CreateRelease.
@@ -133,6 +134,21 @@ func (m *MockPlatform) GetStatus(arg0, arg1, arg2, arg3 string) (*platforms.Stat
 func (mr *MockPlatformMockRecorder) GetStatus(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStatus", reflect.TypeOf((*MockPlatform)(nil).GetStatus), arg0, arg1, arg2, arg3)
+}
+
+// ListDraftReleases mocks base method.
+func (m *MockPlatform) ListDraftReleases(arg0, arg1 string) ([]*platforms.Release, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListDraftReleases", arg0, arg1)
+	ret0, _ := ret[0].([]*platforms.Release)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListDraftReleases indicates an expected call of ListDraftReleases.
+func (mr *MockPlatformMockRecorder) ListDraftReleases(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListDraftReleases", reflect.TypeOf((*MockPlatform)(nil).ListDraftReleases), arg0, arg1)
 }
 
 // ListReleases mocks base method.

@@ -65,13 +65,13 @@ func (j *Job) Process() error {
 		return err
 	}
 
-	releaseList, err := j.Platform.ListReleases(j.Owner, j.Repository)
+	releaseList, err := j.Platform.ListDraftReleases(j.Owner, j.Repository)
 	if err != nil {
 		log.Error().
 			Err(err).
 			Str("owner", j.Owner).
 			Str("repository", j.Repository).
-			Msg("Couldn't list releases")
+			Msg("Couldn't list draft releases")
 		return err
 	}
 

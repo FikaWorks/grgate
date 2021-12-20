@@ -81,7 +81,7 @@ func (p *gitlabPlatform) ListReleases(owner, repository string) (releases []*Rel
 				Platform:    "gitlab",
 				ReleaseNote: release.Description,
 				Tag:         release.TagName,
-				Published:   !draft,
+				Draft:       draft,
 			})
 		}
 
@@ -93,6 +93,20 @@ func (p *gitlabPlatform) ListReleases(owner, repository string) (releases []*Rel
 	}
 
 	return releases, err
+}
+
+// ListDraftReleases from a Gitlab repository
+func (p *gitlabPlatform) ListDraftReleases(owner, repository string) (releases []*Release, err error) {
+	releaseList, err := p.ListReleases(owner, repository)
+	if err != nil {
+		return
+	}
+	for _, release := range releaseList {
+		if release.Draft {
+			releases = append(releases, release)
+		}
+	}
+	return
 }
 
 // UpdateRelease edit a release based on a provided releases ID and release note
@@ -193,7 +207,7 @@ func (p *gitlabPlatform) CreateFile(owner, repository, path, branch, commitMessa
 }
 
 // CreateRelease create a release
-func (p *gitlabPlatform) CreateRelease(owner, repository string, release *Release) (err error) {
+func (p *gitlabPlatform) CreateRelease(owner, repository string, release *Release) (*Release, error) {
 	opts := &gitlab.CreateReleaseOptions{
 		Name:        &release.Name,
 		Ref:         &release.CommitSha,
@@ -201,14 +215,21 @@ func (p *gitlabPlatform) CreateRelease(owner, repository string, release *Releas
 		Description: &release.ReleaseNote,
 	}
 
-	if !release.Published {
+	if release.Draft {
 		// if draft release, set releasedAt to 1 year from now
 		future := time.Now().UTC().Add(futureReleaseTime)
 		opts.ReleasedAt = &future
 	}
 
-	_, _, err = p.client.Releases.CreateRelease(getPID(owner, repository), opts, nil)
-	return
+	r, _, err := p.client.Releases.CreateRelease(getPID(owner, repository), opts, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	release.ID = r.TagName
+	release.CommitSha = r.Commit.ID
+
+	return release, err
 }
 
 // CreateRepository create a repository

@@ -12,6 +12,7 @@ DOCKER_IMAGE=fikaworks/grgate
 	integration-github \
 	integration-gitlab \
 	lint \
+	lint-fix \
 	mocks \
 	push-dockerhub \
 	test \
@@ -41,6 +42,10 @@ push-dockerhub: build-docker
 
 lint:
 	golangci-lint run
+
+lint-fix:
+	golangci-lint run --fix
+	golangci-lint run --fix --build-tags integration tests
 
 mocks:
 	mockgen -source=pkg/platforms/platforms.go -destination=pkg/platforms/mocks/platforms_mock.go

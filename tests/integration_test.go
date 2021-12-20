@@ -61,6 +61,8 @@ statuses:
 		t.Error("Couldn't create file", err)
 		return
 	}
+	// give some time to the provider to create the file
+	time.Sleep(5 * time.Second)
 
 	job, err := workers.NewJob(platform, owner, repository)
 	if err != nil {
@@ -68,22 +70,23 @@ statuses:
 		return
 	}
 
-	var currentRelease *platforms.Release
+	currentRelease, err := platform.CreateRelease(owner, repository, &platforms.Release{
+		CommitSha: "master",
+		Tag:       tag,
+		Draft:     true,
+	})
+	if err != nil {
+		t.Error("Couldn't create release", err)
+		return
+	}
 
 	t.Run("should not publish release when commit status are not defined", func(t *testing.T) {
-		if err := platform.CreateRelease(owner, repository, &platforms.Release{
-			CommitSha: "master",
-			Tag:       tag,
-			Published: false,
-		}); err != nil {
-			t.Error("Couldn't create release", err)
-			return
-		}
-
 		if err := job.Process(); err != nil {
 			t.Error("Couldn't process repository", err)
 			return
 		}
+		// give some time to the provider to publish
+		time.Sleep(5 * time.Second)
 
 		releaseList, err := platform.ListReleases(owner, repository)
 		if err != nil {
@@ -94,8 +97,7 @@ statuses:
 		// check that release hasn't been published, if still draft then the test
 		// is successful
 		for _, release := range releaseList {
-			if release.Tag == tag && !release.Published {
-				currentRelease = release
+			if release.Tag == tag && release.Draft {
 				return
 			}
 		}
@@ -117,6 +119,8 @@ statuses:
 			t.Error("Couldn't process repository", err)
 			return
 		}
+		// give some time to the provider to publish
+		time.Sleep(5 * time.Second)
 
 		releaseList, err := platform.ListReleases(owner, repository)
 		if err != nil {
@@ -127,7 +131,7 @@ statuses:
 		// check that release hasn't been published, if still draft then the test
 		// is successful
 		for _, release := range releaseList {
-			if release.Tag == tag && !release.Published {
+			if release.Tag == tag && release.Draft {
 				return
 			}
 		}
@@ -160,6 +164,8 @@ statuses:
 			t.Error("Couldn't process repository", err)
 			return
 		}
+		// give some time to the provider to publish
+		time.Sleep(5 * time.Second)
 
 		releaseList, err := platform.ListReleases(owner, repository)
 		if err != nil {
@@ -170,7 +176,7 @@ statuses:
 		// check that release hasn't been published, if still draft then the test
 		// is successful
 		for _, release := range releaseList {
-			if release.Tag == tag && release.Published {
+			if release.Tag == tag && !release.Draft {
 				return
 			}
 		}
@@ -212,6 +218,8 @@ statuses:
 		t.Error("Couldn't create file", err)
 		return
 	}
+	// give some time to the provider to create the file
+	time.Sleep(5 * time.Second)
 
 	job, err := workers.NewJob(platform, owner, repository)
 	if err != nil {
@@ -219,7 +227,15 @@ statuses:
 		return
 	}
 
-	var currentRelease *platforms.Release
+	currentRelease, err := platform.CreateRelease(owner, repository, &platforms.Release{
+		CommitSha: "master",
+		Tag:       tag,
+		Draft:     true,
+	})
+	if err != nil {
+		t.Error("Couldn't create release", err)
+		return
+	}
 
 	t.Run("should update release note with statuses", func(t *testing.T) {
 		expectedReleaseNote := `<!-- GRGate start -->
@@ -232,30 +248,22 @@ statuses:
 </details>
 <!-- GRGate end -->`
 
-		if err := platform.CreateRelease(owner, repository, &platforms.Release{
-			CommitSha: "master",
-			Tag:       tag,
-			Published: false,
-		}); err != nil {
-			t.Error("Couldn't create release", err)
-			return
-		}
-
 		if err := job.Process(); err != nil {
 			t.Error("Couldn't process repository", err)
 			return
 		}
+		// give some time to the provider to publish
+		time.Sleep(5 * time.Second)
 
-		releaseList, err := platform.ListReleases(owner, repository)
+		releaseList, err := platform.ListDraftReleases(owner, repository)
 		if err != nil {
 			t.Error("Couldn't list releases from repository", err)
 			return
 		}
 
-		// check that release hasn't been published, if still draft then the test
-		// is successful
+		// check that the draft release hasn't been published
 		for _, release := range releaseList {
-			if release.Tag == tag && !release.Published {
+			if release.Tag == tag {
 				currentRelease = release
 
 				if diff := pretty.Compare(currentRelease.ReleaseNote, expectedReleaseNote); diff != "" {
@@ -266,7 +274,7 @@ statuses:
 			}
 		}
 
-		t.Error("Release should not be published when status is not set")
+		t.Error("Release should not be published when statuses are not set")
 	})
 
 	t.Run("should publish release if all status succeeded", func(t *testing.T) {
@@ -284,7 +292,7 @@ statuses:
 			Name:      "e2e-happyflow",
 			State:     "success",
 			Status:    "completed",
-			CommitSha: currentRelease.CommitSha,
+			CommitSha: "master",
 		}); err != nil {
 			t.Error("Couldn't set success status to commit", err)
 			return
@@ -294,7 +302,7 @@ statuses:
 			Name:      "e2e-featureflow-a",
 			State:     "success",
 			Status:    "completed",
-			CommitSha: currentRelease.CommitSha,
+			CommitSha: "master",
 		}); err != nil {
 			t.Error("Couldn't set success status to commit", err)
 			return
@@ -304,7 +312,7 @@ statuses:
 			Name:      "e2e-featureflow-b",
 			State:     "success",
 			Status:    "completed",
-			CommitSha: currentRelease.CommitSha,
+			CommitSha: "master",
 		}); err != nil {
 			t.Error("Couldn't set success status to commit", err)
 			return
@@ -314,6 +322,8 @@ statuses:
 			t.Error("Couldn't process repository", err)
 			return
 		}
+		// give some time to the provider to publish
+		time.Sleep(5 * time.Second)
 
 		releaseList, err := platform.ListReleases(owner, repository)
 		if err != nil {
@@ -324,7 +334,7 @@ statuses:
 		// check that release has correctly been published
 		for _, release := range releaseList {
 			if release.Tag == tag {
-				if !release.Published {
+				if release.Draft {
 					t.Errorf("Expect release to be published")
 					return
 				}

@@ -17,14 +17,14 @@ import (
 func TestProcess(t *testing.T) {
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 
-	t.Run("should publish release with all status succeeded that match tag regexp",
+  t.Run("should publish release with all status succeeded that match tag regexp",
 		func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
 			mockPlatforms := mock_platforms.NewMockPlatform(ctrl)
 
-			mockPlatforms.EXPECT().ListReleases(gomock.Any(), gomock.Any()).
+			mockPlatforms.EXPECT().ListDraftReleases(gomock.Any(), gomock.Any()).
 				DoAndReturn(
 					func(_ string, _ string) ([]*platforms.Release, error) {
 						return []*platforms.Release{
@@ -76,7 +76,7 @@ func TestProcess(t *testing.T) {
 
 			mockPlatforms := mock_platforms.NewMockPlatform(ctrl)
 
-			mockPlatforms.EXPECT().ListReleases(gomock.Any(), gomock.Any()).
+			mockPlatforms.EXPECT().ListDraftReleases(gomock.Any(), gomock.Any()).
 				DoAndReturn(
 					func(_ string, _ string) ([]*platforms.Release, error) {
 						return []*platforms.Release{
@@ -117,7 +117,7 @@ func TestProcess(t *testing.T) {
 
 			mockPlatforms := mock_platforms.NewMockPlatform(ctrl)
 
-			mockPlatforms.EXPECT().ListReleases(gomock.Any(), gomock.Any()).
+			mockPlatforms.EXPECT().ListDraftReleases(gomock.Any(), gomock.Any()).
 				DoAndReturn(
 					func(_ string, _ string) ([]*platforms.Release, error) {
 						return []*platforms.Release{
@@ -158,7 +158,7 @@ func TestProcess(t *testing.T) {
 
 			mockPlatforms := mock_platforms.NewMockPlatform(ctrl)
 
-			mockPlatforms.EXPECT().ListReleases(gomock.Any(), gomock.Any()).
+			mockPlatforms.EXPECT().ListDraftReleases(gomock.Any(), gomock.Any()).
 				DoAndReturn(
 					func(_ string, _ string) ([]*platforms.Release, error) {
 						return []*platforms.Release{
