@@ -91,7 +91,7 @@ func (p *githubPlatform) ListReleases(owner, repository string) (releases []*Rel
 				Platform:    "github",
 				ReleaseNote: releaseNote,
 				Tag:         tag,
-				Published:   !draft,
+				Draft:       draft,
 			})
 		}
 
@@ -103,6 +103,22 @@ func (p *githubPlatform) ListReleases(owner, repository string) (releases []*Rel
 	}
 
 	return releases, err
+}
+
+// ListDraftReleases from a Github repository
+// Important: information about published releases are available to everyone.
+// Only users with push access will receive listings for draft releases.
+func (p *githubPlatform) ListDraftReleases(owner, repository string) (releases []*Release, err error) {
+	releaseList, err := p.ListReleases(owner, repository)
+	if err != nil {
+		return
+	}
+	for _, release := range releaseList {
+		if release.Draft {
+			releases = append(releases, release)
+		}
+	}
+	return
 }
 
 // UpdateRelease edit a release based on a provided releases ID and release note
@@ -201,16 +217,23 @@ func (p *githubPlatform) CreateFile(owner, repository, path, branch, commitMessa
 }
 
 // CreateRelease create a release
-func (p *githubPlatform) CreateRelease(owner, repository string, release *Release) (err error) {
+func (p *githubPlatform) CreateRelease(owner, repository string, release *Release) (*Release, error) {
 	opts := &github.RepositoryRelease{
 		Name:            github.String(release.Name),
 		TargetCommitish: github.String(release.CommitSha),
 		TagName:         github.String(release.Tag),
-		Draft:           github.Bool(!release.Published),
+		Draft:           github.Bool(release.Draft),
 		Body:            github.String(release.ReleaseNote),
 	}
-	_, _, err = p.client.Repositories.CreateRelease(p.context, owner, repository, opts)
-	return
+	r, _, err := p.client.Repositories.CreateRelease(p.context, owner, repository, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	release.ID = *r.ID
+	release.CommitSha = *r.TargetCommitish
+
+	return release, err
 }
 
 // CreateRepository create a repository

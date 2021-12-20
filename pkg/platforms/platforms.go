@@ -11,12 +11,13 @@ const successStatusValue = "success"
 type Platform interface {
 	CheckAllStatusSucceeded(string, string, string, []string) (bool, error)
 	CreateFile(string, string, string, string, string, string) error
-	CreateRelease(string, string, *Release) error
+	CreateRelease(string, string, *Release) (*Release, error)
 	CreateRepository(string, string, string) error
 	CreateStatus(string, string, *Status) error
 	DeleteRepository(string, string) error
 	GetStatus(string, string, string, string) (*Status, error)
 	ListReleases(string, string) ([]*Release, error)
+	ListDraftReleases(string, string) ([]*Release, error)
 	ListStatuses(string, string, string) ([]*Status, error)
 	PublishRelease(string, string, *Release) (bool, error)
 	ReadFile(string, string, string) (io.Reader, error)
@@ -43,9 +44,9 @@ type Release struct {
 	// ReleaseNote attached to the release
 	ReleaseNote string
 
-	// Published represent the state of the release. For Github it translates to
-	// draft. For Gitlab it translates to a future release
-	Published bool
+	// Draft represent the state of the release. For Gitlab it translates to a
+	// future release
+	Draft bool
 }
 
 // Status contains commit status informations
