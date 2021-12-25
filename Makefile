@@ -45,10 +45,11 @@ lint:
 
 lint-fix:
 	golangci-lint run --fix
-	golangci-lint run --fix --build-tags integration tests
+	golangci-lint run --fix --build-tags unit
+	golangci-lint run --fix --build-tags integration
 
 mocks:
-	mockgen -source=pkg/platforms/platforms.go -destination=pkg/platforms/mocks/platforms_mock.go
+	go generate ./...
 
 test:
 	go test -tags=unit -v -parallel=4 ./...
