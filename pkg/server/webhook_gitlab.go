@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v34/github"
 	"github.com/rs/zerolog/log"
 	"github.com/xanzy/go-gitlab"
 
@@ -70,7 +69,7 @@ func (h *WebhookHandler) GitlabHandler(w http.ResponseWriter, r *http.Request) {
 	case gitlab.EventTypePipeline:
 		h.processGitlabPipelineEvent(*parsedBody.(*gitlab.PipelineEvent))
 	default:
-		log.Info().Msgf("Event type %s is not supported", github.WebHookType(r))
+		log.Info().Msgf("Event type %s is not supported", eventType)
 	}
 }
 
