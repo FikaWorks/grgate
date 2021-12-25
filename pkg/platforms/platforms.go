@@ -4,10 +4,13 @@ import (
 	"io"
 )
 
-// Success status value
-const successStatusValue = "success"
+const (
+	// Success status value
+	successStatusValue = "success"
+)
 
 // Platform interface Github and Gitlab
+//go:generate go run github.com/golang/mock/mockgen -destination mocks/platforms_mock.go -package mock_platforms github.com/fikaworks/grgate/pkg/platforms Platform
 type Platform interface {
 	CheckAllStatusSucceeded(string, string, string, []string) (bool, error)
 	CreateFile(string, string, string, string, string, string) error

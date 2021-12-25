@@ -14,15 +14,15 @@ func TestRenderReleaseNoteAppendStatuses(t *testing.T) {
 		ReleaseNote: "This is a release note",
 		Statuses: []*platforms.Status{
 			{
-				Name:   "e2e A",
+				Name:  "e2e A",
 				State: "success",
 			},
 			{
-				Name:   "e2e B",
+				Name:  "e2e B",
 				State: "failed",
 			},
 			{
-				Name:   "e2e C",
+				Name:  "e2e C",
 				State: "success",
 			},
 		},
@@ -71,15 +71,15 @@ func TestRenderReleaseNoteEditStatuses(t *testing.T) {
 <!-- GRGate end -->`,
 		Statuses: []*platforms.Status{
 			{
-				Name:   "e2e A",
+				Name:  "e2e A",
 				State: "success",
 			},
 			{
-				Name:   "e2e B",
+				Name:  "e2e B",
 				State: "success",
 			},
 			{
-				Name:   "e2e C",
+				Name:  "e2e C",
 				State: "failed",
 			},
 		},

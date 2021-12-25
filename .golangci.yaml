@@ -54,5 +54,8 @@ issues:
         - gosec
       path: tests/
     - linters:
+        - lll
+      source: ^//go:generate
+    - linters:
         - funlen
       path: pkg/workers/job.go

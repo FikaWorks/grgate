@@ -17,7 +17,7 @@ import (
 func TestProcess(t *testing.T) {
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 
-  t.Run("should publish release with all status succeeded that match tag regexp",
+	t.Run("should publish release with all status succeeded that match tag regexp",
 		func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -224,9 +224,9 @@ func TestProcess(t *testing.T) {
 </details>
 <!-- GRGate end -->`
 
-          if diff := pretty.Compare(release.ReleaseNote, expectedReleaseNote); diff != "" {
-            t.Errorf("diff: (-got +want)\n%s", diff)
-          }
+					if diff := pretty.Compare(release.ReleaseNote, expectedReleaseNote); diff != "" {
+						t.Errorf("diff: (-got +want)\n%s", diff)
+					}
 					return nil
 				})
 

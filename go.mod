@@ -5,12 +5,12 @@ go 1.17
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.3
 	github.com/golang/mock v1.6.0
-	github.com/google/go-github/v34 v34.0.0
 	github.com/google/go-github/v41 v41.0.0
 	github.com/gorilla/mux v1.8.0
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/justinas/alice v1.2.0
 	github.com/kylelemons/godebug v1.1.0
+	github.com/migueleliasweb/go-github-mock v0.0.5
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/zerolog v1.26.0
 	github.com/spf13/cobra v1.2.1
@@ -24,6 +24,7 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/golang-jwt/jwt/v4 v4.1.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/go-github/v37 v37.0.0 // indirect
 	github.com/google/go-github/v39 v39.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
