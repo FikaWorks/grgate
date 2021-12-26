@@ -7,6 +7,9 @@ import (
 const (
 	// Success status value
 	successStatusValue = "success"
+
+	// Completed status value
+	completedStatusValue = "completed"
 )
 
 // Platform interface Github and Gitlab

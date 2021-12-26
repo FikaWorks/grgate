@@ -174,18 +174,21 @@ func (p *githubPlatform) CheckAllStatusSucceeded(owner, repository,
 		},
 	}
 
+	succeededCheck := 0
 	for {
 		getCheckRun, resp, err := p.client.Checks.ListCheckRunsForRef(p.context,
 			owner, repository, commitSha, opts)
 		if err != nil {
 			return false, err
 		}
-
-		succeededCheck := 0
 		// TODO: make sure all values in statuses are unique
 		for _, check := range getCheckRun.CheckRuns {
 			for _, status := range statuses {
-				if *check.Name == status && check.Conclusion != nil && *check.Conclusion == successStatusValue {
+				if *check.Name == status &&
+					check.Status != nil &&
+					*check.Status == completedStatusValue &&
+					check.Conclusion != nil &&
+					*check.Conclusion == successStatusValue {
 					succeededCheck++
 				}
 			}
