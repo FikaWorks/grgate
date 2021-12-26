@@ -65,7 +65,7 @@ func TestProcess(t *testing.T) {
 			}
 
 			if err := job.Process(); err != nil {
-				t.Error("error not expected")
+				t.Errorf("error not expected: %#v", err)
 			}
 		})
 
@@ -106,7 +106,7 @@ func TestProcess(t *testing.T) {
 			}
 
 			if err := job.Process(); err != nil {
-				t.Error("error not expected")
+				t.Errorf("error not expected: %#v", err)
 			}
 		})
 
@@ -147,7 +147,7 @@ func TestProcess(t *testing.T) {
 			}
 
 			if err := job.Process(); err != nil {
-				t.Error("error not expected")
+				t.Errorf("error not expected: %#v", err)
 			}
 		})
 
@@ -251,7 +251,7 @@ func TestProcess(t *testing.T) {
 			}
 
 			if err := job.Process(); err != nil {
-				t.Error("error not expected")
+				t.Errorf("error not expected: %#v", err)
 			}
 		})
 }

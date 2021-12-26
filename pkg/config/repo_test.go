@@ -46,7 +46,7 @@ func TestNewRepo(t *testing.T) {
 
 			repoConfig, err := NewRepoConfig(mockPlatforms, "owner", "repository")
 			if err != nil {
-				t.Error("error not expected", err)
+				t.Errorf("Error not expected: %#v", err)
 			}
 
 			if diff := pretty.Compare(repoConfig, expectedRepoConfig); diff != "" {
@@ -88,7 +88,7 @@ statuses:
 
 			repoConfig, err := NewRepoConfig(mockPlatforms, "owner", "repository")
 			if err != nil {
-				t.Error("error not expected", err)
+				t.Errorf("Error not expected: %#v", err)
 			}
 
 			if diff := pretty.Compare(repoConfig, expectedRepoConfig); diff != "" {
