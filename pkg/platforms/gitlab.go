@@ -11,7 +11,7 @@ import (
 
 const (
 	// default number of items per page to retrieve via the Gitlab API
-	gitlabePerPage int = 100
+	gitlabPerPage int = 100
 
 	// default number of hours to set a future release to (aka draft release)
 	// Gitlab doesn't distinguish between draft and published release but use
@@ -60,7 +60,7 @@ func (p *gitlabPlatform) ReadFile(owner, repository, path string) (content io.Re
 func (p *gitlabPlatform) ListReleases(owner, repository string) (releases []*Release, err error) {
 	opts := &gitlab.ListReleasesOptions{
 		Page:    0,
-		PerPage: gitlabePerPage,
+		PerPage: gitlabPerPage,
 	}
 
 	for {
@@ -162,10 +162,11 @@ func (p *gitlabPlatform) CheckAllStatusSucceeded(owner, repository,
 	opts := &gitlab.GetCommitStatusesOptions{
 		ListOptions: gitlab.ListOptions{
 			Page:    0,
-			PerPage: gitlabePerPage,
+			PerPage: gitlabPerPage,
 		},
 	}
 
+	succeededStatus := 0
 	for {
 		commitStatuses, resp, err := p.client.Commits.GetCommitStatuses(getPID(
 			owner, repository), commitSha, opts, nil)
@@ -174,7 +175,6 @@ func (p *gitlabPlatform) CheckAllStatusSucceeded(owner, repository,
 		}
 
 		// for all statuses, check if the provided one are all successful
-		succeededStatus := 0
 		for _, commitStatus := range commitStatuses {
 			for _, status := range statuses {
 				if commitStatus.Name == status && commitStatus.Status == successStatusValue {
