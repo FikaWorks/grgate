@@ -26,7 +26,7 @@ func TestGlobalConfig(t *testing.T) {
 
 			v, err := NewGlobalConfig("")
 			if err != nil {
-				t.Error("Error not expected", err)
+				t.Errorf("Error not expected: %#v", err)
 			}
 
 			for key, expected := range expectedValues {
@@ -40,12 +40,12 @@ func TestGlobalConfig(t *testing.T) {
 		func(t *testing.T) {
 			currentDir, err := os.Getwd()
 			if err != nil {
-				t.Error("Error not expected", err)
+				t.Errorf("Error not expected: %#v", err)
 			}
 
 			file, err := ioutil.TempFile(currentDir, "test-config.*.yaml")
 			if err != nil {
-				t.Error("Error not expected", err)
+				t.Errorf("Error not expected: %#v", err)
 			}
 
 			defer os.Remove(file.Name())
@@ -59,7 +59,7 @@ func TestGlobalConfig(t *testing.T) {
   tagRegexp: v\d*\.\d*\.\d*
 platform: gitlab
 `)); err != nil {
-				t.Error("Error not expected", err)
+				t.Errorf("Error not expected: %#v", err)
 			}
 
 			expectedValues := map[string]interface{}{
@@ -77,7 +77,7 @@ platform: gitlab
 
 			v, err := NewGlobalConfig(file.Name())
 			if err != nil {
-				t.Error("Error not expected", err)
+				t.Errorf("Error not expected: %#v", err)
 			}
 
 			for key, expected := range expectedValues {

@@ -22,7 +22,7 @@ const (
 
 func runTests(t *testing.T, platform platforms.Platform, owner string) {
 	if _, err := config.NewGlobalConfig(""); err != nil {
-		t.Error("Error not expected", err)
+		t.Errorf("Error not expected: %#v", err)
 	}
 
 	testCommitStatus(t, platform, owner)
@@ -52,13 +52,13 @@ statuses:
 
 	repository, err := setup(platform, owner)
 	if err != nil {
-		t.Error("Couldn't create repository", err)
+		t.Errorf("Couldn't create repository: %#v", err)
 		return
 	}
 	defer tearDown(platform, owner, repository)
 
 	if err := platform.CreateFile(owner, repository, ".grgate.yaml", "master", "init", repoConfig); err != nil {
-		t.Error("Couldn't create file", err)
+		t.Errorf("Couldn't create file: %#v", err)
 		return
 	}
 	// give some time to the provider to create the file
@@ -66,7 +66,7 @@ statuses:
 
 	job, err := workers.NewJob(platform, owner, repository)
 	if err != nil {
-		t.Error("Couldn't create job", err)
+		t.Errorf("Couldn't create job: %#v", err)
 		return
 	}
 
@@ -76,13 +76,13 @@ statuses:
 		Draft:     true,
 	})
 	if err != nil {
-		t.Error("Couldn't create release", err)
+		t.Errorf("Couldn't create release: %#v", err)
 		return
 	}
 
 	t.Run("should not publish release when commit status are not defined", func(t *testing.T) {
 		if err := job.Process(); err != nil {
-			t.Error("Couldn't process repository", err)
+			t.Errorf("Couldn't process repository: %#v", err)
 			return
 		}
 		// give some time to the provider to publish
@@ -90,7 +90,7 @@ statuses:
 
 		releaseList, err := platform.ListReleases(owner, repository)
 		if err != nil {
-			t.Error("Couldn't list releases from repository", err)
+			t.Errorf("Couldn't list releases from repository: %#v", err)
 			return
 		}
 
@@ -111,12 +111,12 @@ statuses:
 			Status:    "in_progress",
 			CommitSha: currentRelease.CommitSha,
 		}); err != nil {
-			t.Error("Couldn't set running status to commit", err)
+			t.Errorf("Couldn't set running status to commit: %#v", err)
 			return
 		}
 
 		if err := job.Process(); err != nil {
-			t.Error("Couldn't process repository", err)
+			t.Errorf("Couldn't process repository: %#v", err)
 			return
 		}
 		// give some time to the provider to publish
@@ -124,7 +124,7 @@ statuses:
 
 		releaseList, err := platform.ListReleases(owner, repository)
 		if err != nil {
-			t.Error("Couldn't list releases from repository", err)
+			t.Errorf("Couldn't list releases from repository: %#v", err)
 			return
 		}
 
@@ -146,7 +146,7 @@ statuses:
 			Status:    "completed",
 			CommitSha: currentRelease.CommitSha,
 		}); err != nil {
-			t.Error("Couldn't set success status to commit", err)
+			t.Errorf("Couldn't set success status to commit: %#v", err)
 			return
 		}
 
@@ -156,12 +156,12 @@ statuses:
 			Status:    "completed",
 			CommitSha: currentRelease.CommitSha,
 		}); err != nil {
-			t.Error("Couldn't set success status to commit", err)
+			t.Errorf("Couldn't set success status to commit: %#v", err)
 			return
 		}
 
 		if err := job.Process(); err != nil {
-			t.Error("Couldn't process repository", err)
+			t.Errorf("Couldn't process repository: %#v", err)
 			return
 		}
 		// give some time to the provider to publish
@@ -169,7 +169,7 @@ statuses:
 
 		releaseList, err := platform.ListReleases(owner, repository)
 		if err != nil {
-			t.Error("Couldn't list releases from repository", err)
+			t.Errorf("Couldn't list releases from repository: %#v", err)
 			return
 		}
 
@@ -209,13 +209,13 @@ statuses:
 
 	repository, err := setup(platform, owner)
 	if err != nil {
-		t.Error("Couldn't create repository", err)
+		t.Errorf("Couldn't create repository: %#v", err)
 		return
 	}
 	defer tearDown(platform, owner, repository)
 
 	if err := platform.CreateFile(owner, repository, ".grgate.yaml", "master", "init", repoConfig); err != nil {
-		t.Error("Couldn't create file", err)
+		t.Errorf("Couldn't create file: %#v", err)
 		return
 	}
 	// give some time to the provider to create the file
@@ -223,7 +223,7 @@ statuses:
 
 	job, err := workers.NewJob(platform, owner, repository)
 	if err != nil {
-		t.Error("Couldn't create job", err)
+		t.Errorf("Couldn't create job: %#v", err)
 		return
 	}
 
@@ -233,7 +233,7 @@ statuses:
 		Draft:     true,
 	})
 	if err != nil {
-		t.Error("Couldn't create release", err)
+		t.Errorf("Couldn't create release: %#v", err)
 		return
 	}
 
@@ -249,7 +249,7 @@ statuses:
 <!-- GRGate end -->`
 
 		if err := job.Process(); err != nil {
-			t.Error("Couldn't process repository", err)
+			t.Errorf("Couldn't process repository: %#v", err)
 			return
 		}
 		// give some time to the provider to publish
@@ -257,7 +257,7 @@ statuses:
 
 		releaseList, err := platform.ListDraftReleases(owner, repository)
 		if err != nil {
-			t.Error("Couldn't list releases from repository", err)
+			t.Errorf("Couldn't list releases from repository: %#v", err)
 			return
 		}
 
@@ -294,7 +294,7 @@ statuses:
 			Status:    "completed",
 			CommitSha: "master",
 		}); err != nil {
-			t.Error("Couldn't set success status to commit", err)
+			t.Errorf("Couldn't set success status to commit: %#v", err)
 			return
 		}
 
@@ -304,7 +304,7 @@ statuses:
 			Status:    "completed",
 			CommitSha: "master",
 		}); err != nil {
-			t.Error("Couldn't set success status to commit", err)
+			t.Errorf("Couldn't set success status to commit: %#v", err)
 			return
 		}
 
@@ -314,12 +314,12 @@ statuses:
 			Status:    "completed",
 			CommitSha: "master",
 		}); err != nil {
-			t.Error("Couldn't set success status to commit", err)
+			t.Errorf("Couldn't set success status to commit: %#v", err)
 			return
 		}
 
 		if err := job.Process(); err != nil {
-			t.Error("Couldn't process repository", err)
+			t.Errorf("Couldn't process repository: %#v", err)
 			return
 		}
 		// give some time to the provider to publish
@@ -327,7 +327,7 @@ statuses:
 
 		releaseList, err := platform.ListReleases(owner, repository)
 		if err != nil {
-			t.Error("Couldn't list releases from repository", err)
+			t.Errorf("Couldn't list releases from repository: %#v", err)
 			return
 		}
 
@@ -335,7 +335,7 @@ statuses:
 		for _, release := range releaseList {
 			if release.Tag == tag {
 				if release.Draft {
-					t.Errorf("Expect release to be published")
+					t.Error("Expect release to be published")
 					return
 				}
 				if diff := pretty.Compare(release.ReleaseNote, expectedReleaseNote); diff != "" {

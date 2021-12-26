@@ -51,7 +51,7 @@ func TestRenderReleaseNoteAppendStatuses(t *testing.T) {
 
 	result, err := RenderReleaseNote(template, data)
 	if err != nil {
-		t.Error("Error rendering release note", err)
+		t.Errorf("Error rendering release note: %#v", err)
 	}
 	if diff := pretty.Compare(result, expected); diff != "" {
 		t.Errorf("diff: (-got +want)\n%s", diff)
@@ -108,7 +108,7 @@ func TestRenderReleaseNoteEditStatuses(t *testing.T) {
 
 	result, err := RenderReleaseNote(template, data)
 	if err != nil {
-		t.Error("Error rendering release note", err)
+		t.Errorf("Error rendering release note: %#v", err)
 	}
 	if diff := pretty.Compare(result, expected); diff != "" {
 		t.Errorf("diff: (-got +want)\n%s", diff)
