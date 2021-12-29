@@ -7,23 +7,26 @@ GRGate - Git release gate
 releases based on commit status (aka checks). It can be triggered automatically
 using Git webhook or directly from the CLI.
 
-Currently, only Github and Gitlab are supported, other provider could come in a
+Currently, only GitHub and GitLab are supported, other provider could come in a
 near future.
 
 ![grgate workflow](https://github.com/FikaWorks/grgate/actions/workflows/main.yml/badge.svg?branch=main)
 
 ## Overview
 
-GRGate is a CLI which can run a server and listen to Git webhook. When a release
-is published as draft, GRGate will wait for all the status check attached to the
-commit target of the release to succeed before merging it.
+GRGate is a CLI which can run a server and listen to Git webhook. When a
+release is published as draft, GRGate wait for all status checks attached to
+the commit target of the release to succeed before merging it.
+
+The list of required statuses to succeed is defined in a `.grgate.yaml` config
+file stored at the root of the repository.
 
 The following diagram represent a concret example where a CI/CD process
 generate/publish versionned artifacts and generate a draft release. Artifacts
 are then deployed by a third party to different environments running with
 different config. End-to-end tests are then run against these 2 environments
 and reports result to the draft release as commit status. When all tests pass,
-GRGate publish the Github release.
+GRGate publish the GitHub release.
 
 ![GRGate Overview](grgate-overview.png)
 
@@ -31,38 +34,57 @@ GRGate publish the Github release.
 
 Different terminology is used by different provider:
 
-- **Github** uses the term [draft releases][draft-release] to prepare a release
+- **GitHub** uses the term [draft releases][draft-release] to prepare a release
 without publishing it.
-- **Gitlab** uses the term [upcoming releases][upcoming-release], it is similar
-to Github Pre-releases where a badge notify the upcoming release in the Gitlab
+- **GitLab** uses the term [upcoming releases][upcoming-release], it is similar
+to GitHub Pre-releases where a badge notify the upcoming release in the GitLab
 release page.  The attribute `released_at` should be set to a future date to
-have it enabled and it is only possible to change it using the Gitlab API.
-
-[draft-release]: https://docs.github.com/en/github/administering-a-repository/managing-releases-in-a-repository#about-release-management
-[upcoming-release]: https://docs.gitlab.com/ee/api/releases/#upcoming-releases
+have it enabled and it is only possible to change it using the GitLab API.
 
 ## Getting started
 
-Create a Github APP or Gitlab token, then create a `config.yaml` or a
-`values.yaml` file if using Helm charts.
+### Quick start using the GRGate GitHub App
 
-### Helm chart
+1. Install the GRGate GitHub App to your repository or organisation
+2. Create a `.grgate.yaml` file at the root of your repository with the
+following configuration:
+```yaml
+# automerge releases if the following status succeeded
+statuses:
+  - e2e happy flow
+  - e2e feature A
+```
+3. Create a draft release
+4. Start updating commits using the [GRGgate CLI][release-page], for example
+(GitHub):
+```bash
+$ grgate status set your-org/your-repository-name \
+    --commit 93431f42d5a5abc2bb6703fc723b162a9d2f20c3 \
+    --name "e2e happyflow" \
+    --status completed \
+    --state success
+$ grgate status set your-org/your-repository-name \
+    --commit 93431f42d5a5abc2bb6703fc723b162a9d2f20c3 \
+    --name "e2e happyflow" \
+    --status completed \
+    --state success
+```
+5. After GRGate process the repo, the draft release will be published!
+
+### Self hosting GRGate using Helm chart
 
 A Helm chart is available in the [FikaWorks Helm charts
 repository][helm-charts].
 
-[helm-charts]: https://github.com/FikaWorks/helm-charts
-
+Create a GitHub APP or GitLab token, then update the `values.yaml` file.
 ```bash
 $ helm repo add fikaworks https://fikaworks.github.io/helm-charts
-$ helm install --name grgate --f my-values.yaml fikaworks/grgate
+$ helm install --name grgate --values my-values.yaml fikaworks/grgate
 ```
 
 ### GRGate CLI
 
 Download latest release from the [release page][release-page].
-
-[release-page]: https://github.com/fikaworks/grgate/releases
 
 ```bash
 # check available commands
@@ -103,7 +125,7 @@ argument, by default it will try to read from `/etc/grgate/config.yaml`.
 ```yaml
 # global configuration, this is the default
 globals:
-  # enable GRGatem, if set to false release are not published
+  # enable GRGate, if set to false release are not published
   enabled: true
 
   # filter release by tag, the tag associated to the draft/unpublished releases
@@ -143,25 +165,31 @@ workers: 1
 # platform to use
 platform: github # github|gitlab, default: github
 
-# Github configuration
-# when creating the Github app, make sure to set the following permissions:
-#   - Administration read/write
-#   - Checks read/write
-#   - Contents read/write
-#   - Metadata read-only
-#   - Commit statuses read/write
-#
-# subscribe to the following webhook events:
-#   - Check runs
-#   - Check suites
-#   - Releases
-#   - Statuses
+# GitHub configuration
+# when creating the GitHub App, make sure to set the following permissions:
+# A. for self-hosting, the following permissions are required to process
+#    repositories through webhook events:
+#      - Checks read-only
+#      - Contents read/write
+#      - Metadata read-only
+#      - Commit statuses read-only
+#    and subscribe to the following webhook events:
+#      - Check runs
+#      - Check suites
+#      - Releases
+#      - Statuses
+# B. when using the cli, additional permissions are required to interact with
+#    checks and commit statuses:
+#      - Checks read/write
+#      - Contents read/write
+#      - Metadata read-only
+#      - Commit statuses read/write
 github:
   appID: 000000
   installationID: 00000000
   privateKeyPath: path-to-key.pem
 
-# Gitlab configuration
+# GitLab configuration
 # when creating the Gitlab token, make sure to set the following permissions:
 #   - read_repository
 # subscribe to the following webhook events:
@@ -197,4 +225,11 @@ statuses:
 ## Contributing / local development
 
 For local development and to contribute to this project, refer to
-[CONTRIBUTING.md](./CONTRIBUTING.md).
+[CONTRIBUTING.md][contributing].
+
+<!-- page links -->
+[contributing]: ./CONTRIBUTING.md
+[draft-release]: https://docs.github.com/en/github/administering-a-repository/managing-releases-in-a-repository#about-release-management
+[helm-charts]: https://github.com/FikaWorks/helm-charts
+[release-page]: https://github.com/fikaworks/grgate/releases
+[upcoming-release]: https://docs.gitlab.com/ee/api/releases/#upcoming-releases

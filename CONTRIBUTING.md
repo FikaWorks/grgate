@@ -1,8 +1,10 @@
 Contributing to GRGate
 ======================
 
+### Local development
+
 For local development, you can use [ngrok](https://ngrok.com/) to receive
-Github webhook events.
+GitHub webhook events.
 
 Start ngrok and forward requests to port `8080`:
 
@@ -10,7 +12,7 @@ Start ngrok and forward requests to port `8080`:
 $ ngrok http 8080
 ```
 
-Create a new webhook from the Github organization or repository settings page.
+Create a new webhook from the GitHub organization or repository settings page.
 
 Use the following settings:
 - set the payload URL to your ngrok endpoint, ie:
@@ -87,10 +89,12 @@ Create a Gitlab personnal access token with the following scopes:
 - `read_api`
 - `write_repository`
 
-Create a Github personnal access token with the following scopes:
-- `api`
-- `read_api`
-- `write_repository`
+Create a GitHub App with the following permissions:
+- `administration read/write`
+- `checks read/write`
+- `contents read/write`
+- `metadata read-only`
+- `commit statuses read/write`
 
 #### Run integration tests
 
@@ -107,5 +111,5 @@ $ make integration
 ## Release
 
 [GoReleaser](https://goreleaser.com/) is used to generate all the necessary
-binaries and attach them together with the changelog to the Github release. To
-release, create a tag then wait for Github Actions to publish the release.
+binaries and attach them together with the changelog to the GitHub release. To
+release, create a tag then wait for GitHub Actions to publish the release.
