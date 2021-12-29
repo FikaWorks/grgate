@@ -196,6 +196,7 @@ func (p *gitlabPlatform) CheckAllStatusSucceeded(owner, repository,
 }
 
 // CreateFile create a file with content at a given path
+// This function is only called by integration tests
 func (p *gitlabPlatform) CreateFile(owner, repository, path, branch, commitMessage, body string) (err error) {
 	opts := &gitlab.CreateFileOptions{
 		Branch:        &branch,
@@ -206,7 +207,8 @@ func (p *gitlabPlatform) CreateFile(owner, repository, path, branch, commitMessa
 	return
 }
 
-// CreateRelease create a release
+// CreateRelease create a release.
+// This function is only called by integration tests
 func (p *gitlabPlatform) CreateRelease(owner, repository string, release *Release) (*Release, error) {
 	opts := &gitlab.CreateReleaseOptions{
 		Name:        &release.Name,
@@ -233,6 +235,7 @@ func (p *gitlabPlatform) CreateRelease(owner, repository string, release *Releas
 }
 
 // CreateRepository create a repository
+// This function is only called by integration tests
 func (p *gitlabPlatform) CreateRepository(owner, repository, visibility string) (err error) {
 	opts := &gitlab.CreateProjectOptions{
 		Name:       gitlab.String(repository),
@@ -259,6 +262,7 @@ func (p *gitlabPlatform) CreateStatus(owner, repository string, status *Status) 
 }
 
 // DeleteRepository delete a repository
+// This function is only called by integration tests
 func (p *gitlabPlatform) DeleteRepository(owner, repository string) (err error) {
 	_, err = p.client.Projects.DeleteProject(getPID(owner, repository), nil)
 	return

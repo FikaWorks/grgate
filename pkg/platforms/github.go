@@ -207,6 +207,7 @@ func (p *githubPlatform) CheckAllStatusSucceeded(owner, repository,
 }
 
 // CreateFile create a file with content at a given path
+// This function is only called by integration tests
 func (p *githubPlatform) CreateFile(owner, repository, path, branch, commitMessage, body string) (err error) {
 	opts := &github.RepositoryContentFileOptions{
 		Branch:  github.String(branch),
@@ -219,7 +220,8 @@ func (p *githubPlatform) CreateFile(owner, repository, path, branch, commitMessa
 	return
 }
 
-// CreateRelease create a release
+// CreateRelease create a release.
+// This function is only called by integration tests
 func (p *githubPlatform) CreateRelease(owner, repository string, release *Release) (*Release, error) {
 	opts := &github.RepositoryRelease{
 		Name:            github.String(release.Name),
@@ -240,6 +242,7 @@ func (p *githubPlatform) CreateRelease(owner, repository string, release *Releas
 }
 
 // CreateRepository create a repository
+// This function is only called by integration tests
 func (p *githubPlatform) CreateRepository(owner, repository, visibility string) (err error) {
 	opts := &github.Repository{
 		Name:       github.String(repository),
@@ -268,6 +271,7 @@ func (p *githubPlatform) CreateStatus(owner, repository string, status *Status) 
 }
 
 // DeleteRepository delete a repository
+// This function is only called by integration tests
 func (p *githubPlatform) DeleteRepository(owner, repository string) (err error) {
 	_, err = p.client.Repositories.Delete(p.context, owner, repository)
 	return
