@@ -17,6 +17,19 @@ import (
 func TestProcess(t *testing.T) {
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 
+	t.Run("should not process the repository if disabled by config",
+		func(t *testing.T) {
+			job := &Job{
+				Config: &config.RepoConfig{
+					Enabled: false,
+				},
+			}
+
+			if err := job.Process(); err != nil {
+				t.Errorf("error not expected: %#v", err)
+			}
+		})
+
 	t.Run("should publish release with all status succeeded that match tag regexp",
 		func(t *testing.T) {
 			ctrl := gomock.NewController(t)
@@ -57,6 +70,7 @@ func TestProcess(t *testing.T) {
 				Platform: mockPlatforms,
 				Config: &config.RepoConfig{
 					Enabled:   true,
+					Statuses:  []string{"happy flow"},
 					TagRegexp: "^v\\d+\\.\\d+\\.\\d+$",
 					ReleaseNote: &config.ReleaseNote{
 						Enabled: false,
@@ -98,6 +112,7 @@ func TestProcess(t *testing.T) {
 				Platform: mockPlatforms,
 				Config: &config.RepoConfig{
 					Enabled:   false,
+					Statuses:  []string{"happy flow"},
 					TagRegexp: ".*",
 					ReleaseNote: &config.ReleaseNote{
 						Enabled: false,
@@ -139,6 +154,7 @@ func TestProcess(t *testing.T) {
 				Platform: mockPlatforms,
 				Config: &config.RepoConfig{
 					Enabled:   true,
+					Statuses:  []string{"happy flow"},
 					TagRegexp: ".*",
 					ReleaseNote: &config.ReleaseNote{
 						Enabled: false,
@@ -150,6 +166,10 @@ func TestProcess(t *testing.T) {
 				t.Errorf("error not expected: %#v", err)
 			}
 		})
+}
+
+func TestProcessReleaseNote(t *testing.T) {
+	zerolog.SetGlobalLevel(zerolog.Disabled)
 
 	t.Run("should update release note with correct status check when RepoConfig.ReleaseNote.Enabled is true",
 		func(t *testing.T) {
@@ -157,24 +177,6 @@ func TestProcess(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockPlatforms := mock_platforms.NewMockPlatform(ctrl)
-
-			mockPlatforms.EXPECT().ListDraftReleases(gomock.Any(), gomock.Any()).
-				DoAndReturn(
-					func(_ string, _ string) ([]*platforms.Release, error) {
-						return []*platforms.Release{
-							{
-								ID:          1,
-								Tag:         "v1.2.3",
-								ReleaseNote: "This is a release note",
-							},
-						}, nil
-					})
-
-			mockPlatforms.EXPECT().CheckAllStatusSucceeded(gomock.Any(), gomock.Any(),
-				gomock.Any(), gomock.Any()).DoAndReturn(
-				func(_ string, _ string, _ string, _ []string) (bool, error) {
-					return false, nil
-				})
 
 			mockPlatforms.EXPECT().ListStatuses(gomock.Any(), gomock.Any(),
 				gomock.Any()).DoAndReturn(
@@ -233,7 +235,15 @@ func TestProcess(t *testing.T) {
 			job := &Job{
 				Platform: mockPlatforms,
 				Config: &config.RepoConfig{
-					Enabled:   true,
+					Enabled: true,
+					Statuses: []string{
+						"e2e A",
+						"e2e B",
+						"e2e C",
+						"e2e D",
+						"e2e E",
+						"e2e F",
+					},
 					TagRegexp: ".*",
 					ReleaseNote: &config.ReleaseNote{
 						Enabled: true,
@@ -250,7 +260,13 @@ func TestProcess(t *testing.T) {
 				},
 			}
 
-			if err := job.Process(); err != nil {
+			releaseList := &platforms.Release{
+				ID:          1,
+				Tag:         "v1.2.3",
+				ReleaseNote: "This is a release note",
+			}
+
+			if err := job.processReleaseNote(releaseList); err != nil {
 				t.Errorf("error not expected: %#v", err)
 			}
 		})
