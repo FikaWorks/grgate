@@ -35,9 +35,81 @@ func NewJob(platform platforms.Platform, owner, repository string) (job *Job, er
 	return
 }
 
+// processReleaseNote update releases description with statuses based on the
+// release template defined in config
+func (j *Job) processReleaseNote(release *platforms.Release) (err error) {
+	if !j.Config.ReleaseNote.Enabled {
+		return
+	}
+	log.Info().
+		Str("repository", j.Repository).
+		Str("owner", j.Owner).
+		Str("releaseCommit", release.CommitSha).
+		Str("releaseTag", release.Tag).
+		Str("releaseName", release.Name).
+		Msg("Updating status list in release note")
+
+	statusList, err := j.Platform.ListStatuses(j.Owner, j.Repository,
+		release.CommitSha)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("owner", j.Owner).
+			Str("repository", j.Repository).
+			Str("releaseCommit", release.CommitSha).
+			Str("releaseTag", release.Tag).
+			Str("releaseName", release.Name).
+			Msg("Couldn't list release statuses")
+		return
+	}
+
+	releaseNoteData := &utils.ReleaseNoteData{
+		ReleaseNote: release.ReleaseNote,
+		Statuses:    utils.MergeStatuses(statusList, j.Config.Statuses),
+	}
+	release.ReleaseNote, err = utils.RenderReleaseNote(j.Config.ReleaseNote.Template,
+		releaseNoteData)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("owner", j.Owner).
+			Str("repository", j.Repository).
+			Str("releaseCommit", release.CommitSha).
+			Str("releaseTag", release.Tag).
+			Str("releaseName", release.Name).
+			Msg("Couldn't render release note")
+		return
+	}
+
+	if j.Config.Enabled {
+		err = j.Platform.UpdateRelease(j.Owner, j.Repository, release)
+		if err != nil {
+			log.Error().
+				Err(err).
+				Str("owner", j.Owner).
+				Str("repository", j.Repository).
+				Str("releaseCommit", release.CommitSha).
+				Str("releaseTag", release.Tag).
+				Str("releaseName", release.Name).
+				Msg("Couldn't update release")
+			return
+		}
+	} else {
+		log.Info().
+			Str("repository", j.Repository).
+			Str("owner", j.Owner).
+			Str("releaseCommit", release.CommitSha).
+			Str("releaseTag", release.Tag).
+			Str("releaseName", release.Name).
+			Msgf("Would update release note with statuses [dry-run]")
+	}
+
+	return nil
+}
+
 // Process job by getting all the draft/unpublished releases, for each release
 // check that all the required status succeeded then publish the release
-func (j *Job) Process() error {
+func (j *Job) Process() (err error) {
 	log.Info().
 		Str("repository", j.Repository).
 		Str("owner", j.Owner).
@@ -54,6 +126,14 @@ func (j *Job) Process() error {
 		Str("repository", j.Repository).
 		Str("owner", j.Owner).
 		Msgf("Matching tag regexp: %s", j.Config.TagRegexp)
+
+	if len(j.Config.Statuses) == 0 {
+		log.Info().
+			Str("repository", j.Repository).
+			Str("owner", j.Owner).
+			Msg("Statuses are undefined in config, skipping process")
+		return nil
+	}
 
 	tagRegexp, err := regexp.Compile(j.Config.TagRegexp)
 	if err != nil {
@@ -114,69 +194,8 @@ func (j *Job) Process() error {
 			return err
 		}
 
-		if j.Config.ReleaseNote.Enabled {
-			log.Info().
-				Str("repository", j.Repository).
-				Str("owner", j.Owner).
-				Str("releaseCommit", release.CommitSha).
-				Str("releaseTag", release.Tag).
-				Str("releaseName", release.Name).
-				Msg("Updating status list in release note")
-
-			statusList, err := j.Platform.ListStatuses(j.Owner, j.Repository,
-				release.CommitSha)
-			if err != nil {
-				log.Error().
-					Err(err).
-					Str("owner", j.Owner).
-					Str("repository", j.Repository).
-					Str("releaseCommit", release.CommitSha).
-					Str("releaseTag", release.Tag).
-					Str("releaseName", release.Name).
-					Msg("Couldn't list release statuses")
-				return err
-			}
-
-			releaseNoteData := &utils.ReleaseNoteData{
-				ReleaseNote: release.ReleaseNote,
-				Statuses:    utils.MergeStatuses(statusList, j.Config.Statuses),
-			}
-			release.ReleaseNote, err = utils.RenderReleaseNote(j.Config.ReleaseNote.Template,
-				releaseNoteData)
-			if err != nil {
-				log.Error().
-					Err(err).
-					Str("owner", j.Owner).
-					Str("repository", j.Repository).
-					Str("releaseCommit", release.CommitSha).
-					Str("releaseTag", release.Tag).
-					Str("releaseName", release.Name).
-					Msg("Couldn't render release note")
-				return err
-			}
-
-			if j.Config.Enabled {
-				err = j.Platform.UpdateRelease(j.Owner, j.Repository, release)
-				if err != nil {
-					log.Error().
-						Err(err).
-						Str("owner", j.Owner).
-						Str("repository", j.Repository).
-						Str("releaseCommit", release.CommitSha).
-						Str("releaseTag", release.Tag).
-						Str("releaseName", release.Name).
-						Msg("Couldn't update release")
-					return err
-				}
-			} else {
-				log.Info().
-					Str("repository", j.Repository).
-					Str("owner", j.Owner).
-					Str("releaseCommit", release.CommitSha).
-					Str("releaseTag", release.Tag).
-					Str("releaseName", release.Name).
-					Msgf("Would update release note with statuses [dry-run]")
-			}
+		if err = j.processReleaseNote(release); err != nil {
+			return err
 		}
 
 		log.Trace().
