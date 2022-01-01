@@ -11,17 +11,17 @@ Installing the GRGate GitHub App explicitly grants us access to some of the
 data you've shared with GitHub. This can include personal data, source code
 repository content, and repository metadata.
 
-All permissions required to run the app are listed in this repository. This
-application do not download any content besides the `.grgate.yaml` file.
-Contents write permission is required to publish releases.
+All permissions required and actions taken to run the app are listed in this
+repository. This application do not download any content besides the
+`.grgate.yaml` file. Contents write permission is required to publish releases.
 
 GRGate does not collect any data and do not store data on our servers besides a
 temporary storage of log files which is kept for less than 30 days.
 
 ## Hosting Provider
 
-The GRGate GitHub App is hosted on OVH and DigitalOcean, therefore their own
-privacy policies apply.
+The GRGate GitHub App is hosted on GCP, therefore its own privacy policies
+apply.
 
 ## Contact
 
