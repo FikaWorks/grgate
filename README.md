@@ -45,8 +45,8 @@ have it enabled and it is only possible to change it using the GitLab API.
 
 ### Quick start using the GRGate GitHub App
 
-1. Install the [GRGate GitHub App](https://github.com/marketplace/grgate) to
-your repository or organisation
+1. Install the [GRGate GitHub App][github-market-place] to your repository or
+organisation
 2. Create a `.grgate.yaml` file at the root of your repository with the
 following configuration:
 ```yaml
@@ -281,3 +281,4 @@ For local development and to contribute to this project, refer to
 [helm-charts]: https://github.com/FikaWorks/helm-charts
 [release-page]: https://github.com/fikaworks/grgate/releases
 [upcoming-release]: https://docs.gitlab.com/ee/api/releases/#upcoming-releases
+[github-market-place]: https://github.com/marketplace/grgate
