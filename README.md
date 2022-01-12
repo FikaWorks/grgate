@@ -45,7 +45,8 @@ have it enabled and it is only possible to change it using the GitLab API.
 
 ### Quick start using the GRGate GitHub App
 
-1. Install the GRGate GitHub App to your repository or organisation
+1. Install the [GRGate GitHub App][github-market-place] to your repository or
+organisation
 2. Create a `.grgate.yaml` file at the root of your repository with the
 following configuration:
 ```yaml
@@ -240,7 +241,6 @@ FROM alpine
 
 LABEL repository="my-organization/my-repository"
 LABEL commitSha="abcd1234"
-EOF
 ```
 
 The repository would have a `.grgate.yaml` config located in the root of the
@@ -261,10 +261,10 @@ $ repository=$(docker inspect my-app --format='{{.Config.Labels.repository}}')
 $ commitSha=$(docker inspect my-app --format='{{.Config.Labels.commitSha}}')
 
 $ grgate status set "$repository" \
-  --commit "$commitSha" \
-  --name "e2e happy flow" \
-  --status completed \
-  --state success
+    --commit "$commitSha" \
+    --name "e2e happy flow" \
+    --status completed \
+    --state success
 ```
 
 From there, if GRGate is listening to webhook, then the draft release will be
@@ -281,3 +281,4 @@ For local development and to contribute to this project, refer to
 [helm-charts]: https://github.com/FikaWorks/helm-charts
 [release-page]: https://github.com/fikaworks/grgate/releases
 [upcoming-release]: https://docs.gitlab.com/ee/api/releases/#upcoming-releases
+[github-market-place]: https://github.com/marketplace/grgate
