@@ -64,6 +64,20 @@ func (mr *MockPlatformMockRecorder) CreateFile(arg0, arg1, arg2, arg3, arg4, arg
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFile", reflect.TypeOf((*MockPlatform)(nil).CreateFile), arg0, arg1, arg2, arg3, arg4, arg5)
 }
 
+// CreateIssue mocks base method.
+func (m *MockPlatform) CreateIssue(arg0, arg1 string, arg2 *platforms.Issue) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateIssue", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateIssue indicates an expected call of CreateIssue.
+func (mr *MockPlatformMockRecorder) CreateIssue(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIssue", reflect.TypeOf((*MockPlatform)(nil).CreateIssue), arg0, arg1, arg2)
+}
+
 // CreateRelease mocks base method.
 func (m *MockPlatform) CreateRelease(arg0, arg1 string, arg2 *platforms.Release) (*platforms.Release, error) {
 	m.ctrl.T.Helper()
@@ -151,6 +165,21 @@ func (mr *MockPlatformMockRecorder) ListDraftReleases(arg0, arg1 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListDraftReleases", reflect.TypeOf((*MockPlatform)(nil).ListDraftReleases), arg0, arg1)
 }
 
+// ListIssuesByAuthor mocks base method.
+func (m *MockPlatform) ListIssuesByAuthor(arg0, arg1 string, arg2 interface{}) ([]*platforms.Issue, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListIssuesByAuthor", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]*platforms.Issue)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListIssuesByAuthor indicates an expected call of ListIssuesByAuthor.
+func (mr *MockPlatformMockRecorder) ListIssuesByAuthor(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListIssuesByAuthor", reflect.TypeOf((*MockPlatform)(nil).ListIssuesByAuthor), arg0, arg1, arg2)
+}
+
 // ListReleases mocks base method.
 func (m *MockPlatform) ListReleases(arg0, arg1 string) ([]*platforms.Release, error) {
 	m.ctrl.T.Helper()
@@ -209,6 +238,34 @@ func (m *MockPlatform) ReadFile(arg0, arg1, arg2 string) (io.Reader, error) {
 func (mr *MockPlatformMockRecorder) ReadFile(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadFile", reflect.TypeOf((*MockPlatform)(nil).ReadFile), arg0, arg1, arg2)
+}
+
+// UpdateFile mocks base method.
+func (m *MockPlatform) UpdateFile(arg0, arg1, arg2, arg3, arg4, arg5 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateFile", arg0, arg1, arg2, arg3, arg4, arg5)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateFile indicates an expected call of UpdateFile.
+func (mr *MockPlatformMockRecorder) UpdateFile(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockPlatform)(nil).UpdateFile), arg0, arg1, arg2, arg3, arg4, arg5)
+}
+
+// UpdateIssue mocks base method.
+func (m *MockPlatform) UpdateIssue(arg0, arg1 string, arg2 *platforms.Issue) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateIssue", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateIssue indicates an expected call of UpdateIssue.
+func (mr *MockPlatformMockRecorder) UpdateIssue(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateIssue", reflect.TypeOf((*MockPlatform)(nil).UpdateIssue), arg0, arg1, arg2)
 }
 
 // UpdateRelease mocks base method.

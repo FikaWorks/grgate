@@ -189,7 +189,7 @@ func (p *gitlabPlatform) CheckAllStatusSucceeded(owner, repository,
 			break
 		}
 
-		opts.Page = resp.NextPage
+		opts.ListOptions.Page = resp.NextPage
 	}
 
 	return succeeded, err
@@ -204,6 +204,29 @@ func (p *gitlabPlatform) CreateFile(owner, repository, path, branch, commitMessa
 		CommitMessage: &commitMessage,
 	}
 	_, _, err = p.client.RepositoryFiles.CreateFile(getPID(owner, repository), path, opts, nil)
+	return
+}
+
+// UpdateFile update a file with content at a given path
+// This function is only called by integration tests
+func (p *gitlabPlatform) UpdateFile(owner, repository, path, branch, commitMessage, body string) (err error) {
+	opts := &gitlab.UpdateFileOptions{
+		Branch:        &branch,
+		Content:       &body,
+		CommitMessage: &commitMessage,
+	}
+	_, _, err = p.client.RepositoryFiles.UpdateFile(getPID(owner, repository), path, opts, nil)
+	return
+}
+
+// CreateIssue create an issue
+func (p *gitlabPlatform) CreateIssue(owner, repository string, issue *Issue) (err error) {
+	opts := &gitlab.CreateIssueOptions{
+		Title:       &issue.Title,
+		Description: &issue.Body,
+	}
+	_, _, err = p.client.Issues.CreateIssue(getPID(owner, repository), opts, nil)
+
 	return
 }
 
@@ -268,6 +291,41 @@ func (p *gitlabPlatform) DeleteRepository(owner, repository string) (err error) 
 	return
 }
 
+// ListIssuesByAuthor from a given repository
+func (p *gitlabPlatform) ListIssuesByAuthor(owner, repository string,
+	author interface{}) (issueList []*Issue, err error) {
+	opts := &gitlab.ListProjectIssuesOptions{
+		AuthorUsername: gitlab.String(author.(string)),
+		ListOptions: gitlab.ListOptions{
+			Page:    0,
+			PerPage: gitlabPerPage,
+		},
+	}
+
+	for {
+		issuesFromRepo, resp, err := p.client.Issues.ListProjectIssues(getPID(owner, repository), opts, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, issue := range issuesFromRepo {
+			issueList = append(issueList, &Issue{
+				Body:  issue.Description,
+				ID:    issue.ID,
+				Title: issue.Title,
+			})
+		}
+
+		if resp.NextPage == 0 {
+			break
+		}
+
+		opts.ListOptions.Page = resp.NextPage
+	}
+
+	return issueList, err
+}
+
 // GetStatus returns the status of a specific commit matching a provided status name
 func (p *gitlabPlatform) GetStatus(owner, repository, commitSha, statusName string) (status *Status, err error) {
 	statusList, err := p.ListStatuses(owner, repository, commitSha)
@@ -304,6 +362,17 @@ func (p *gitlabPlatform) ListStatuses(owner, repository, commitSha string) (stat
 	}
 
 	return statusList, err
+}
+
+// UpdateIssue update an issue
+func (p *gitlabPlatform) UpdateIssue(owner, repository string, issue *Issue) (err error) {
+	opts := &gitlab.UpdateIssueOptions{
+		Title:       &issue.Title,
+		Description: &issue.Body,
+	}
+	_, _, err = p.client.Issues.UpdateIssue(getPID(owner, repository), issue.ID.(int), opts)
+
+	return
 }
 
 func getPID(owner, repository string) string {

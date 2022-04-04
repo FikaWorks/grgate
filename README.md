@@ -137,6 +137,23 @@ globals:
   statuses:
     - e2e happy flow
 
+  # display issue dashboard, GRGate create an issue in the repository and
+  # provide feedback when mis-configuration or other issues are detected
+  dashboard:
+    enabled: true
+    author: GRGate[bot]
+    title: GRGate dashboard
+    template: |-
+      GRGate is {{ if .Enabled }}enabled
+      {{- else }}disabled{{ end }} for this repository.
+      {{- if .Errors }}
+
+      Incorrect configuration detected with the following error(s):
+      {{- range .Errors }}
+      - {{ . }}
+      {{- end }}
+      {{- end }}
+
   # append statuses to release note
   releaseNote:
     enabled: true
@@ -172,6 +189,7 @@ platform: github # github|gitlab, default: github
 #    repositories through webhook events:
 #      - Checks read-only
 #      - Contents read/write
+#      - Issues read/write
 #      - Metadata read-only
 #      - Commit statuses read-only
 #    and subscribe to the following webhook events:

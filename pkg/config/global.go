@@ -17,8 +17,14 @@ func NewGlobalConfig(path string) (v *viper.Viper, err error) {
 		v.SetConfigType("yaml")
 	}
 
+	v.SetEnvPrefix("grgate")
+
 	// Set defaults
 	v.SetDefault("globals.enabled", DefaultEnabled)
+	v.SetDefault("globals.dashboard.enabled", DefaultDashboardEnabled)
+	v.SetDefault("globals.dashboard.author", DefaultDashboardAuthor)
+	v.SetDefault("globals.dashboard.title", DefaultDashboardTitle)
+	v.SetDefault("globals.dashboard.template", DefaultDashboardTemplate)
 	v.SetDefault("globals.releaseNote.enabled", DefaultReleaseNoteEnabled)
 	v.SetDefault("globals.releaseNote.template", DefaultReleaseNoteTemplate)
 	v.SetDefault("globals.tagRegexp", DefaultTagRegexp)

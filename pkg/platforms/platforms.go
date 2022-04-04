@@ -17,17 +17,28 @@ const (
 type Platform interface {
 	CheckAllStatusSucceeded(string, string, string, []string) (bool, error)
 	CreateFile(string, string, string, string, string, string) error
+	UpdateFile(string, string, string, string, string, string) error
+	CreateIssue(string, string, *Issue) error
 	CreateRelease(string, string, *Release) (*Release, error)
 	CreateRepository(string, string, string) error
 	CreateStatus(string, string, *Status) error
 	DeleteRepository(string, string) error
 	GetStatus(string, string, string, string) (*Status, error)
-	ListReleases(string, string) ([]*Release, error)
 	ListDraftReleases(string, string) ([]*Release, error)
+	ListIssuesByAuthor(string, string, interface{}) ([]*Issue, error)
+	ListReleases(string, string) ([]*Release, error)
 	ListStatuses(string, string, string) ([]*Status, error)
 	PublishRelease(string, string, *Release) (bool, error)
 	ReadFile(string, string, string) (io.Reader, error)
+	UpdateIssue(string, string, *Issue) error
 	UpdateRelease(string, string, *Release) error
+}
+
+// Issue contains the GRGate dashboard issue informations
+type Issue struct {
+	ID    interface{}
+	Title string
+	Body  string
 }
 
 // Release represent a release regarding the platform

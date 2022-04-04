@@ -32,6 +32,10 @@ func NewRepoConfig(platform platforms.Platform, owner, repository string) (confi
 
 	// Set defaults
 	v.SetDefault("enabled", Main.Globals.Enabled)
+	v.SetDefault("dashboard.enabled", Main.Globals.Dashboard.Enabled)
+	v.SetDefault("dashboard.author", Main.Globals.Dashboard.Author)
+	v.SetDefault("dashboard.title", Main.Globals.Dashboard.Title)
+	v.SetDefault("dashboard.template", Main.Globals.Dashboard.Template)
 	v.SetDefault("releaseNote.enabled", Main.Globals.ReleaseNote.Enabled)
 	v.SetDefault("releaseNote.template", Main.Globals.ReleaseNote.Template)
 	v.SetDefault("statuses", Main.Globals.Statuses)

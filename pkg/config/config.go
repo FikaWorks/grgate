@@ -19,6 +19,28 @@ const (
 	// the repository or not
 	DefaultEnabled bool = true
 
+	// DefaultDashboardEnabled define if the issue dashboard your be enabled to
+	// provide feedback on the state of GRGate
+	DefaultDashboardEnabled bool = true
+
+	// DefaultDashboardAuthor define the title of the issue dashboard
+	DefaultDashboardAuthor string = "GRGate[bot]"
+
+	// DefaultDashboardTitle define the title of the issue dashboard
+	DefaultDashboardTitle string = "GRGate dashboard"
+
+	// DefaultDashboardTemplate define the default template used to display
+	// the state of GRGate in a GitHub/GitLab issue
+	DefaultDashboardTemplate string = `GRGate is {{ if .Enabled }}enabled
+{{- else }}disabled{{ end }} for this repository.
+{{- if .Errors }}
+
+Incorrect configuration detected with the following error(s):
+{{- range .Errors }}
+- {{ . }}
+{{- end }}
+{{- end }}`
+
 	// DefaultTagRegexp is the default pattern used to match tags attached to
 	// releases
 	DefaultTagRegexp string = ".*"
@@ -98,6 +120,14 @@ type Gitlab struct {
 	Token string `mapstructure:"token"`
 }
 
+// Dashboard define the issue dashboard configuration
+type Dashboard struct {
+	Enabled  bool   `mapstructure:"enabled"`
+	Author   string `mapstructure:"author"`
+	Title    string `mapstructure:"title"`
+	Template string `mapstructure:"template"`
+}
+
 // ReleaseNote define the release note configuration
 type ReleaseNote struct {
 	Enabled  bool   `mapstructure:"enabled"`
@@ -107,6 +137,7 @@ type ReleaseNote struct {
 // RepoConfig define repository configuration
 type RepoConfig struct {
 	Enabled     bool         `mapstructure:"enabled"`
+	Dashboard   *Dashboard   `mapstructure:"dashboard"`
 	ReleaseNote *ReleaseNote `mapstructure:"releaseNote"`
 	Statuses    []string     `mapstructure:"statuses"`
 	TagRegexp   string       `mapstructure:"tagRegexp"`

@@ -28,7 +28,7 @@ func (h *WebhookHandler) processEvent(owner, repository string) {
 
 	job, err := workers.NewJob(h.Platform, owner, repository)
 	if err != nil {
-		log.Error().Err(err).Msgf("Could create job for %s/%s", owner, repository)
+		log.Error().Err(err).Msgf("Could not create job for %s/%s", owner, repository)
 		return
 	}
 
