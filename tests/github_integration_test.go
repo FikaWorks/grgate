@@ -11,6 +11,7 @@ import (
 )
 
 func TestGithubReleases(t *testing.T) {
+	author := os.Getenv("GITHUB_AUTHOR")
 	githubAppID, _ := strconv.ParseInt(os.Getenv("GITHUB_APP_ID"), 10, 64)
 	githubInstallationID, _ := strconv.ParseInt(os.Getenv("GITHUB_INSTALLATION_ID"), 10, 64)
 	githubPrivateKeyPath := os.Getenv("GITHUB_PRIVATE_KEY_PATH")
@@ -26,5 +27,5 @@ func TestGithubReleases(t *testing.T) {
 		return
 	}
 
-	runTests(t, platform, owner)
+	runTests(t, platform, owner, author)
 }
