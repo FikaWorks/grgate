@@ -24,8 +24,8 @@ all: \
 
 build:
 	go build \
-	-ldflags="-X 'github.com/fikaworks/grgate/pkg/config.Version=$(GRGATE_VERSION)' -X 'github.com/fikaworks/grgate/pkg/config.CommitSha=$(GRGATE_COMMITSHA)'" \
-	-a -o grgate .
+		-ldflags="-X 'github.com/fikaworks/grgate/pkg/config.Version=$(GRGATE_VERSION)' -X 'github.com/fikaworks/grgate/pkg/config.CommitSha=$(GRGATE_COMMITSHA)'" \
+		-a -o grgate .
 
 build-docker:
 	docker build \
