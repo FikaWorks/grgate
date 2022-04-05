@@ -74,6 +74,7 @@ $ make test
 mocks, you can regenerate all mocks by using the following command:
 
 ```bash
+$ go install github.com/golang/mock/mockgen@latest
 $ make mocks
 ```
 
@@ -92,19 +93,22 @@ Create a Gitlab personnal access token with the following scopes:
 Create a GitHub App with the following permissions:
 - `administration read/write`
 - `checks read/write`
-- `contents read/write`
-- `metadata read-only`
 - `commit statuses read/write`
+- `contents read/write`
+- `issues read/write`
+- `metadata read-only`
 
 #### Run integration tests
 
 ```bash
-$ export GITLAB_OWNER=<gitlab repository owner>
-$ export GITLAB_TOKEN=<gitlab api token>
+$ export GITHUB_APP_ID=<github app id>
+$ export GITHUB_AUHOR=<github author, usually username[bot]>
+$ export GITHUB_INSTALLATION_ID=<github installation id>
 $ export GITHUB_OWNER=<github repository owner>
 $ export GITHUB_PRIVATE_KEY_PATH=<github private key path>
-$ export GITHUB_APP_ID=<github app id>
-$ export GITHUB_INSTALLATION_ID=<github installation id>
+$ export GITLAB_AUTHOR=<gitlab author, usually owner>
+$ export GITLAB_OWNER=<gitlab repository owner>
+$ export GITLAB_TOKEN=<gitlab api token>
 $ make integration
 ```
 

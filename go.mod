@@ -15,7 +15,7 @@ require (
 	github.com/rs/zerolog v1.26.0
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
-	github.com/xanzy/go-gitlab v0.52.2
+	github.com/xanzy/go-gitlab v0.61.0
 )
 
 require (

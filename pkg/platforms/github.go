@@ -220,6 +220,31 @@ func (p *githubPlatform) CreateFile(owner, repository, path, branch, commitMessa
 	return
 }
 
+// UpdateFile update a file with content at a given path
+// This function is only called by integration tests
+func (p *githubPlatform) UpdateFile(owner, repository, path, branch, commitMessage, body string) (err error) {
+	opts := &github.RepositoryContentFileOptions{
+		Branch:  github.String(branch),
+		Content: []byte(body),
+		Message: github.String(commitMessage),
+	}
+
+	_, _, err = p.client.Repositories.UpdateFile(p.context, owner, repository, path, opts)
+
+	return
+}
+
+// CreateIssue create an issue
+func (p *githubPlatform) CreateIssue(owner, repository string, issue *Issue) (err error) {
+	issueRequest := &github.IssueRequest{
+		Title: github.String(issue.Title),
+		Body:  github.String(issue.Body),
+	}
+	_, _, err = p.client.Issues.Create(p.context, owner, repository, issueRequest)
+
+	return
+}
+
 // CreateRelease create a release.
 // This function is only called by integration tests
 func (p *githubPlatform) CreateRelease(owner, repository string, release *Release) (*Release, error) {
@@ -294,6 +319,42 @@ func (p *githubPlatform) GetStatus(owner, repository, commitSha, statusName stri
 	return
 }
 
+// ListIssuesByAuthor from a given repository
+func (p *githubPlatform) ListIssuesByAuthor(owner, repository string,
+	author interface{}) (issueList []*Issue, err error) {
+	opts := &github.IssueListByRepoOptions{
+		Creator: author.(string),
+		ListOptions: github.ListOptions{
+			Page:    0,
+			PerPage: githubPerPage,
+		},
+	}
+
+	for {
+		issuesFromRepo, resp, err := p.client.Issues.ListByRepo(p.context, owner,
+			repository, opts)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, issue := range issuesFromRepo {
+			issueList = append(issueList, &Issue{
+				Body:  *issue.Body,
+				ID:    *issue.Number,
+				Title: *issue.Title,
+			})
+		}
+
+		if resp.NextPage == 0 {
+			break
+		}
+
+		opts.ListOptions.Page = resp.NextPage
+	}
+
+	return issueList, err
+}
+
 // ListStatuses attached to a given commit sha
 func (p *githubPlatform) ListStatuses(owner, repository, commitSha string) (statusList []*Status, err error) {
 	opts := &github.ListCheckRunsOptions{
@@ -331,4 +392,15 @@ func (p *githubPlatform) ListStatuses(owner, repository, commitSha string) (stat
 	}
 
 	return statusList, err
+}
+
+// UpdateIssue update an issue
+func (p *githubPlatform) UpdateIssue(owner, repository string, issue *Issue) (err error) {
+	issueRequest := &github.IssueRequest{
+		Title: github.String(issue.Title),
+		Body:  github.String(issue.Body),
+	}
+	_, _, err = p.client.Issues.Edit(p.context, owner, repository, issue.ID.(int), issueRequest)
+
+	return
 }

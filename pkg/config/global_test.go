@@ -13,6 +13,10 @@ func TestGlobalConfig(t *testing.T) {
 		func(t *testing.T) {
 			expectedValues := map[string]interface{}{
 				"globals.enabled":              DefaultEnabled,
+				"globals.dashboard.enabled":    DefaultDashboardEnabled,
+				"globals.dashboard.author":     DefaultDashboardAuthor,
+				"globals.dashboard.title":      DefaultDashboardTitle,
+				"globals.dashboard.template":   DefaultDashboardTemplate,
 				"globals.releaseNote.enabled":  DefaultReleaseNoteEnabled,
 				"globals.releaseNote.template": DefaultReleaseNoteTemplate,
 				"globals.tagRegexp":            DefaultTagRegexp,
@@ -52,6 +56,12 @@ func TestGlobalConfig(t *testing.T) {
 
 			if _, err := file.Write([]byte(`globals:
   enabled: true
+  dashboard:
+    enabled: false
+    author: some author
+    title: some title
+    template: |-
+      some template
   releaseNote:
     enabled: false
     template: |-
@@ -64,6 +74,10 @@ platform: gitlab
 
 			expectedValues := map[string]interface{}{
 				"globals.enabled":              DefaultEnabled,
+				"globals.dashboard.enabled":    false,
+				"globals.dashboard.author":     "some author",
+				"globals.dashboard.title":      "some title",
+				"globals.dashboard.template":   "some template",
 				"globals.releaseNote.enabled":  false,
 				"globals.releaseNote.template": "some template",
 				"globals.tagRegexp":            "v\\d*\\.\\d*\\.\\d*",

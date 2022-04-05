@@ -33,9 +33,15 @@ func TestNewRepo(t *testing.T) {
 					})
 
 			expectedRepoConfig := RepoConfig{
-				Enabled: true,
+				Enabled: DefaultEnabled,
+				Dashboard: &Dashboard{
+					Enabled:  DefaultDashboardEnabled,
+					Author:   DefaultDashboardAuthor,
+					Title:    DefaultDashboardTitle,
+					Template: DefaultDashboardTemplate,
+				},
 				ReleaseNote: &ReleaseNote{
-					Enabled:  true,
+					Enabled:  DefaultReleaseNoteEnabled,
 					Template: DefaultReleaseNoteTemplate,
 				},
 				Statuses:  []string{},
@@ -66,19 +72,31 @@ func TestNewRepo(t *testing.T) {
 				DoAndReturn(
 					func(_ string, _ string, _ string) (io.Reader, error) {
 						return strings.NewReader(`enabled: true
+dashboard:
+  enabled: false
+  author: some author
+  title: some title
+  template: |-
+    some template
 releaseNote:
   enabled: false
   template: |-
-    no template
+    some template
 statuses:
   - happy-flow`), nil
 					})
 
 			expectedRepoConfig := RepoConfig{
 				Enabled: true,
+				Dashboard: &Dashboard{
+					Enabled:  false,
+					Author:   "some author",
+					Title:    "some title",
+					Template: "some template",
+				},
 				ReleaseNote: &ReleaseNote{
 					Enabled:  false,
-					Template: "no template",
+					Template: "some template",
 				},
 				Statuses:  []string{"happy-flow"},
 				TagRegexp: ".*",

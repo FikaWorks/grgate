@@ -10,8 +10,9 @@ import (
 )
 
 func TestGitLabReleases(t *testing.T) {
-	token := os.Getenv("GITLAB_TOKEN")
+	author := os.Getenv("GITLAB_AUTHOR")
 	owner := os.Getenv("GITLAB_OWNER")
+	token := os.Getenv("GITLAB_TOKEN")
 
 	platform, err := platforms.NewGitlab(&platforms.GitlabConfig{
 		Token: token,
@@ -21,5 +22,5 @@ func TestGitLabReleases(t *testing.T) {
 		return
 	}
 
-	runTests(t, platform, owner)
+	runTests(t, platform, owner, author)
 }

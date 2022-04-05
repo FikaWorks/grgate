@@ -22,6 +22,9 @@ func TestProcess(t *testing.T) {
 			job := &Job{
 				Config: &config.RepoConfig{
 					Enabled: false,
+					Dashboard: &config.Dashboard{
+						Enabled: false,
+					},
 				},
 			}
 
@@ -72,6 +75,9 @@ func TestProcess(t *testing.T) {
 					Enabled:   true,
 					Statuses:  []string{"happy flow"},
 					TagRegexp: "^v\\d+\\.\\d+\\.\\d+$",
+					Dashboard: &config.Dashboard{
+						Enabled: false,
+					},
 					ReleaseNote: &config.ReleaseNote{
 						Enabled: false,
 					},
@@ -114,6 +120,9 @@ func TestProcess(t *testing.T) {
 					Enabled:   false,
 					Statuses:  []string{"happy flow"},
 					TagRegexp: ".*",
+					Dashboard: &config.Dashboard{
+						Enabled: false,
+					},
 					ReleaseNote: &config.ReleaseNote{
 						Enabled: false,
 					},
@@ -156,6 +165,9 @@ func TestProcess(t *testing.T) {
 					Enabled:   true,
 					Statuses:  []string{"happy flow"},
 					TagRegexp: ".*",
+					Dashboard: &config.Dashboard{
+						Enabled: false,
+					},
 					ReleaseNote: &config.ReleaseNote{
 						Enabled: false,
 					},

@@ -15,24 +15,27 @@ import (
 	"github.com/fikaworks/grgate/pkg/workers"
 )
 
-const (
-	repositoryPrefix = "grgate-integration"
-	hashSize         = 5
-)
+const repositoryPrefix = "grgate-integration"
 
-func runTests(t *testing.T, platform platforms.Platform, owner string) {
+func runTests(t *testing.T, platform platforms.Platform, owner, author string) {
 	if _, err := config.NewGlobalConfig(""); err != nil {
 		t.Errorf("Error not expected: %#v", err)
 	}
 
-	testDisabledConfig(t, platform, owner)
-	testCommitStatus(t, platform, owner)
-	testReleaseNote(t, platform, owner)
+	// force set author in order to look for issues by author during validation steps
+	config.Main.Globals.Dashboard.Author = author
+
+	runTest(t, platform, owner, disabledConfigTestCases)
+	runTest(t, platform, owner, commitStatusTestCases)
+	runTest(t, platform, owner, releaseNoteTestCases)
+	runTest(t, platform, owner, dashboardTestCases)
 }
 
 func setup(platform platforms.Platform, owner string) (repository string, err error) {
 	rand.Seed(time.Now().UnixNano())
+
 	repository = generateRandomRepositoryName(repositoryPrefix)
+
 	fmt.Printf("Creating repository %s/%s\n", owner, repository)
 	err = platform.CreateRepository(owner, repository, "private")
 	return
@@ -42,365 +45,118 @@ func tearDown(platform platforms.Platform, owner, repository string) {
 	_ = platform.DeleteRepository(owner, repository)
 }
 
-func testDisabledConfig(t *testing.T, platform platforms.Platform, owner string) {
-	repoConfig := `enabled: false
-statuses:
-- e2e-happyflow`
-	tag := "v1.2.3"
-
-	repository, err := setup(platform, owner)
-	if err != nil {
-		t.Errorf("Couldn't create repository: %#v", err)
-		return
-	}
-	defer tearDown(platform, owner, repository)
-
-	if err := platform.CreateFile(owner, repository, ".grgate.yaml", "master", "init", repoConfig); err != nil {
-		t.Errorf("Couldn't create file: %#v", err)
-		return
-	}
-
-	job, err := workers.NewJob(platform, owner, repository)
-	if err != nil {
-		t.Errorf("Couldn't create job: %#v", err)
-		return
-	}
-
-	currentRelease, err := platform.CreateRelease(owner, repository, &platforms.Release{
-		CommitSha: "master",
-		Tag:       tag,
-		Draft:     true,
-	})
-	if err != nil {
-		t.Errorf("Couldn't create release: %#v", err)
-		return
-	}
-
-	if err := platform.CreateStatus(owner, repository, &platforms.Status{
-		Name:      "e2e-happyflow",
-		State:     "success",
-		Status:    "completed",
-		CommitSha: currentRelease.CommitSha,
-	}); err != nil {
-		t.Errorf("Couldn't set running status to commit: %#v", err)
-		return
-	}
-
-	t.Run("should not process the release when disabled by config", func(t *testing.T) {
-		if err := job.Process(); err != nil {
-			t.Errorf("Couldn't process repository: %#v", err)
-			return
-		}
-
-		releaseList, err := platform.ListReleases(owner, repository)
-		if err != nil {
-			t.Errorf("Couldn't list releases from repository: %#v", err)
-			return
-		}
-
-		// check that release hasn't been published, if still draft then the test
-		// is successful
-		for _, release := range releaseList {
-			if release.Tag == tag && release.Draft {
+// runTests prepare a repository and run GRGate against it
+func runTest(t *testing.T, platform platforms.Platform, owner string, testCases map[string]*testCase) {
+	for title, testCase := range testCases {
+		t.Run(title, func(t *testing.T) {
+			repository, err := setup(platform, owner)
+			if err != nil {
+				t.Errorf("Couldn't create repository: %#v", err)
 				return
 			}
-		}
 
-		t.Error("Release should not be published when disabled by config")
-	})
-}
+			// fix flakky repository creation, it seems to have inconsistent delay
+			time.Sleep(time.Second)
 
-func testCommitStatus(t *testing.T, platform platforms.Platform, owner string) {
-	repoConfig := `enabled: true
-tagRegexp: v\d*\.\d*\.\d*-beta\.\d*
-statuses:
-- e2e-happyflow
-- e2e-featureflow`
+			defer tearDown(platform, owner, repository)
 
-	tag := "v1.2.3-beta.0"
-
-	repository, err := setup(platform, owner)
-	if err != nil {
-		t.Errorf("Couldn't create repository: %#v", err)
-		return
-	}
-	defer tearDown(platform, owner, repository)
-
-	if err := platform.CreateFile(owner, repository, ".grgate.yaml", "master", "init", repoConfig); err != nil {
-		t.Errorf("Couldn't create file: %#v", err)
-		return
-	}
-
-	job, err := workers.NewJob(platform, owner, repository)
-	if err != nil {
-		t.Errorf("Couldn't create job: %#v", err)
-		return
-	}
-
-	currentRelease, err := platform.CreateRelease(owner, repository, &platforms.Release{
-		CommitSha: "master",
-		Tag:       tag,
-		Draft:     true,
-	})
-	if err != nil {
-		t.Errorf("Couldn't create release: %#v", err)
-		return
-	}
-
-	t.Run("should not publish release when commit status are not defined", func(t *testing.T) {
-		if err := job.Process(); err != nil {
-			t.Errorf("Couldn't process repository: %#v", err)
-			return
-		}
-
-		releaseList, err := platform.ListReleases(owner, repository)
-		if err != nil {
-			t.Errorf("Couldn't list releases from repository: %#v", err)
-			return
-		}
-
-		// check that release hasn't been published, if still draft then the test
-		// is successful
-		for _, release := range releaseList {
-			if release.Tag == tag && release.Draft {
+			if err := platform.CreateFile(owner, repository, ".grgate.yaml",
+				"master", "init", testCase.withRepoConfig); err != nil {
+				t.Errorf("Couldn't create file: %#v", err)
 				return
 			}
-		}
 
-		t.Error("Release should not be published when status is not set")
-	})
+			// fix flakky CreateFile, it seems to have inconsistent delay
+			time.Sleep(time.Second)
 
-	t.Run("should not publish release when some commit status are still running", func(t *testing.T) {
-		if err := platform.CreateStatus(owner, repository, &platforms.Status{
-			Name:      "e2e-happyflow",
-			Status:    "in_progress",
-			CommitSha: currentRelease.CommitSha,
-		}); err != nil {
-			t.Errorf("Couldn't set running status to commit: %#v", err)
-			return
-		}
-
-		if err := job.Process(); err != nil {
-			t.Errorf("Couldn't process repository: %#v", err)
-			return
-		}
-
-		releaseList, err := platform.ListReleases(owner, repository)
-		if err != nil {
-			t.Errorf("Couldn't list releases from repository: %#v", err)
-			return
-		}
-
-		// check that release hasn't been published, if still draft then the test
-		// is successful
-		for _, release := range releaseList {
-			if release.Tag == tag && release.Draft {
+			release, err := platform.CreateRelease(owner, repository, &platforms.Release{
+				CommitSha: "master",
+				Tag:       testCase.withTag,
+				Draft:     true,
+			})
+			if err != nil {
+				t.Errorf("Couldn't create release: %#v", err)
 				return
 			}
-		}
 
-		t.Error("Release should not be published when the commit status are still running")
-	})
+			// fix flakky CreateRelease, it seems to have inconsistent delay
+			time.Sleep(time.Second)
 
-	t.Run("should publish release if all status succeeded", func(t *testing.T) {
-		if err := platform.CreateStatus(owner, repository, &platforms.Status{
-			Name:      "e2e-happyflow",
-			State:     "success",
-			Status:    "completed",
-			CommitSha: currentRelease.CommitSha,
-		}); err != nil {
-			t.Errorf("Couldn't set success status to commit: %#v", err)
-			return
-		}
-
-		if err := platform.CreateStatus(owner, repository, &platforms.Status{
-			Name:      "e2e-featureflow",
-			State:     "success",
-			Status:    "completed",
-			CommitSha: currentRelease.CommitSha,
-		}); err != nil {
-			t.Errorf("Couldn't set success status to commit: %#v", err)
-			return
-		}
-
-		if err := job.Process(); err != nil {
-			t.Errorf("Couldn't process repository: %#v", err)
-			return
-		}
-
-		releaseList, err := platform.ListReleases(owner, repository)
-		if err != nil {
-			t.Errorf("Couldn't list releases from repository: %#v", err)
-			return
-		}
-
-		// check that release hasn't been published, if still draft then the test
-		// is successful
-		for _, release := range releaseList {
-			if release.Tag == tag && !release.Draft {
+			job, err := workers.NewJob(platform, owner, repository)
+			if err != nil {
+				t.Errorf("Couldn't create job: %#v", err)
 				return
 			}
-		}
 
-		t.Error("Release wasn't published after all commit status succeeded")
-	})
-}
-
-func testReleaseNote(t *testing.T, platform platforms.Platform, owner string) {
-	repoConfig := `enabled: true
-tagRegexp: v\d*\.\d*\.\d*-beta\.\d*
-releaseNote:
-  enabled: true
-  template: |-
-    {{- .ReleaseNote -}}
-    <!-- GRGate start -->
-    <details><summary>GRGate status check</summary>
-    {{ range .Statuses }}
-    - [{{ if or (eq .Status "completed" ) (eq .Status "success") }}x{{ else }} {{ end }}] {{ .Name }}
-    {{- end }}
-
-    </details>
-    <!-- GRGate end -->
-statuses:
-- e2e-happyflow
-- e2e-featureflow-a
-- e2e-featureflow-b`
-
-	tag := "v1.2.3-beta.1"
-
-	repository, err := setup(platform, owner)
-	if err != nil {
-		t.Errorf("Couldn't create repository: %#v", err)
-		return
-	}
-	defer tearDown(platform, owner, repository)
-
-	if err := platform.CreateFile(owner, repository, ".grgate.yaml", "master", "init", repoConfig); err != nil {
-		t.Errorf("Couldn't create file: %#v", err)
-		return
-	}
-
-	job, err := workers.NewJob(platform, owner, repository)
-	if err != nil {
-		t.Errorf("Couldn't create job: %#v", err)
-		return
-	}
-
-	currentRelease, err := platform.CreateRelease(owner, repository, &platforms.Release{
-		CommitSha: "master",
-		Tag:       tag,
-		Draft:     true,
-	})
-	if err != nil {
-		t.Errorf("Couldn't create release: %#v", err)
-		return
-	}
-
-	t.Run("should update release note with statuses", func(t *testing.T) {
-		expectedReleaseNote := `<!-- GRGate start -->
-<details><summary>GRGate status check</summary>
-
-- [ ] e2e-featureflow-a
-- [ ] e2e-featureflow-b
-- [ ] e2e-happyflow
-
-</details>
-<!-- GRGate end -->`
-
-		if err := job.Process(); err != nil {
-			t.Errorf("Couldn't process repository: %#v", err)
-			return
-		}
-
-		releaseList, err := platform.ListDraftReleases(owner, repository)
-		if err != nil {
-			t.Errorf("Couldn't list releases from repository: %#v", err)
-			return
-		}
-
-		// check that the draft release hasn't been published
-		for _, release := range releaseList {
-			if release.Tag == tag {
-				currentRelease = release
-
-				if diff := pretty.Compare(currentRelease.ReleaseNote, expectedReleaseNote); diff != "" {
-					t.Errorf("diff: (-got +want)\n%s", diff)
+			for _, status := range testCase.withStatuses {
+				status.CommitSha = release.CommitSha
+				if err := platform.CreateStatus(owner, repository, status); err != nil {
+					t.Errorf("Couldn't set status named %s to state %s and status %s : %#v",
+						status.Name, status.State, status.Status, err)
 					return
 				}
+			}
+
+			// fix flakky CreateStatus, it seems to have inconsistent delay
+			time.Sleep(time.Second)
+
+			if err := job.Process(); err != nil && !testCase.expectErrorDuringProcess {
+				t.Errorf("Couldn't process repository: %#v", err)
 				return
 			}
-		}
 
-		t.Error("Release should not be published when statuses are not set")
-	})
+			// fix flakky Process, it seems to have inconsistent delay
+			time.Sleep(time.Second)
 
-	t.Run("should publish release if all status succeeded", func(t *testing.T) {
-		expectedReleaseNote := `<!-- GRGate start -->
-<details><summary>GRGate status check</summary>
-
-- [x] e2e-featureflow-a
-- [x] e2e-featureflow-b
-- [x] e2e-happyflow
-
-</details>
-<!-- GRGate end -->`
-
-		if err := platform.CreateStatus(owner, repository, &platforms.Status{
-			Name:      "e2e-happyflow",
-			State:     "success",
-			Status:    "completed",
-			CommitSha: "master",
-		}); err != nil {
-			t.Errorf("Couldn't set success status to commit: %#v", err)
-			return
-		}
-
-		if err := platform.CreateStatus(owner, repository, &platforms.Status{
-			Name:      "e2e-featureflow-a",
-			State:     "success",
-			Status:    "completed",
-			CommitSha: "master",
-		}); err != nil {
-			t.Errorf("Couldn't set success status to commit: %#v", err)
-			return
-		}
-
-		if err := platform.CreateStatus(owner, repository, &platforms.Status{
-			Name:      "e2e-featureflow-b",
-			State:     "success",
-			Status:    "completed",
-			CommitSha: "master",
-		}); err != nil {
-			t.Errorf("Couldn't set success status to commit: %#v", err)
-			return
-		}
-
-		if err := job.Process(); err != nil {
-			t.Errorf("Couldn't process repository: %#v", err)
-			return
-		}
-
-		releaseList, err := platform.ListReleases(owner, repository)
-		if err != nil {
-			t.Errorf("Couldn't list releases from repository: %#v", err)
-			return
-		}
-
-		// check that release has correctly been published
-		for _, release := range releaseList {
-			if release.Tag == tag {
-				if release.Draft {
-					t.Error("Expect release to be published")
-					return
-				}
-				if diff := pretty.Compare(release.ReleaseNote, expectedReleaseNote); diff != "" {
-					t.Errorf("diff: (-got +want)\n%s", diff)
-					return
-				}
+			// validate issue dashboard
+			issueList, err := platform.ListIssuesByAuthor(owner, repository, config.Main.Globals.Dashboard.Author)
+			if err != nil {
+				t.Errorf("Couldn't list issues from repository: %#v", err)
 				return
 			}
-		}
 
-		t.Error("Release wasn't published after all commit status succeeded")
-	})
+			issueExist := false
+			for _, issue := range issueList {
+				if issue.Title == testCase.expectedDashboardTitle {
+					if diff := pretty.Compare(issue.Body, testCase.expectedDashboardBody); diff != "" {
+						t.Errorf("diff: (-got +want)\n%s", diff)
+						return
+					}
+					issueExist = true
+					break
+				}
+			}
+
+			if testCase.expectIssueToBeCreated && !issueExist {
+				t.Errorf("Issue dashboard was not found in repository %s/%s", owner, repository)
+				return
+			}
+
+			// validate release status
+			releaseList, err := platform.ListReleases(owner, repository)
+			if err != nil {
+				t.Errorf("Couldn't list releases from repository: %#v", err)
+				return
+			}
+
+			for _, release := range releaseList {
+				if release.Tag == testCase.withTag {
+					diff := pretty.Compare(release.ReleaseNote, testCase.expectedReleaseNote)
+					if diff != "" && testCase.expectedReleaseNote != "" {
+						t.Errorf("diff: (-got +want)\n%s", diff)
+						return
+					}
+
+					if testCase.expectPublishedRelease == !release.Draft {
+						return
+					}
+
+					t.Error("Expected release to be published")
+					return
+				}
+			}
+
+			t.Error("Release was not found")
+		})
+	}
 }
