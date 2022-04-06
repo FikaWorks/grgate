@@ -83,6 +83,19 @@ $ helm repo add fikaworks https://fikaworks.github.io/helm-charts
 $ helm install --name grgate --values my-values.yaml fikaworks/grgate
 ```
 
+### Running GRGate in Docker
+
+```bash
+$ docker run -ti -p 8080:8080 -p 8086:8086 -p 9101:9101 \
+    -v $PWD/config.yaml:/etc/grgate/config.yaml \
+    -v $PWD/github.private-key.pem:/etc/grgate/github.private-key.pem \
+    fikaworks/grgate
+```
+
+By default, the webserver is exposed at http://0.0.0.0:8080. Prometheus is
+exposed at http://0.0.0.0:9101/metrics and the liveness/readiness probes are
+exposed at http://0.0.0.0:8086/ready and http://0.0.0.0:8086/live.
+
 ### GRGate CLI
 
 Download latest release from the [release page][release-page].
