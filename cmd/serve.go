@@ -13,8 +13,8 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Run HTTP server to receive git webhook event",
 	Long: `The serve command create 3 HTTP server with the following
-functionnalities:
-  - 0.0.0.0:8080 listen to git webhook
+functionalities:
+  - 0.0.0.0:8080 listen for git webhook
   - 0.0.0.0:9101 expose Prometheus metrics
   - 0.0.0.0:8086 expose health probe (liveness/readiness)
 `,

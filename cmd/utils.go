@@ -18,6 +18,7 @@ func newPlatform() (platform platforms.Platform, err error) {
 			AppID:          config.Main.Github.AppID,
 			InstallationID: config.Main.Github.InstallationID,
 			PrivateKeyPath: config.Main.Github.PrivateKeyPath,
+			Token:          config.Main.Github.Token,
 		})
 	default:
 		err = fmt.Errorf("platform %s is not recognized", *config.Main.Platform)
