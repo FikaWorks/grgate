@@ -35,6 +35,7 @@ func init() {
 	flags.Int64("github.installationID", 0, "Github Installation ID")
 	flags.String("github.privateKeyPath", "", "Github private key path")
 	flags.String("github.webhookSecret", "", "Github webhook secret")
+	flags.String("github.token", "", "Github token (prefer private key authentication instead)")
 	flags.String("gitlab.token", "", "Gitlab Token")
 	flags.String("logLevel", "info", "Log level: trace, debug, info, warn,"+
 		"error, fatal or panic")

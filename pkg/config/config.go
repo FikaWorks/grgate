@@ -113,6 +113,7 @@ type Github struct {
 	AppID          int64  `mapstructure:"appID"`
 	InstallationID int64  `mapstructure:"installationID"`
 	PrivateKeyPath string `mapstructure:"privateKeyPath"`
+	Token          string `mapstructure:"token"`
 }
 
 // Gitlab define Gitlab configuration
