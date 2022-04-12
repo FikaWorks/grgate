@@ -6,8 +6,15 @@ GRGate example with Kubernetes and GitHub
 > execution is successful. Docker KinD is used, and you will need to create 2
 > repositories to test the release publishing flow.
 
+## Overview
+
+The diagram below represent the idea of what GRGate can be used in Kubernetes.
+
 ![GRGate in your GitOps environment](grgate-kubernetes.png "GRGate in your
 GitOps environment")
+
+In the following section, we will test the integration of GRGate with Docker
+KinD.
 
 ## Getting started
 
