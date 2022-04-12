@@ -1,0 +1,4 @@
+github:
+  appID: 000000
+  installationID: 00000000
+  privateKeyPath: /etc/grgate/github.private-key.pem

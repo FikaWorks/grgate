@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../../bases/backend
+  - ../../bases/frontend
+  - ../../bases/e2e-runner
+
+resources:
+  - namespace.yaml
+
+namespace: development
+
+commonLabels:
+  environment: development
+
+secretGenerator:
+  - name: e2e-runner-config
+    env: e2e-runner-config.env
+  - name: grgate-github-cert
+    files:
+      - github.private-key.pem
+
+configMapGenerator:
+  - name: grgate-config
+    files:
+      - grgate-config.yaml

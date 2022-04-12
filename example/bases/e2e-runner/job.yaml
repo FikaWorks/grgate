@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: e2e-runner
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: e2e-runner
+      containers:
+        - name: e2e-runner
+          image: e2e-runner
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: e2e-runner-config
+          env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - name: grgate-github-cert
+              mountPath: /etc/grgate/github.private-key.pem
+              subPath: github.private-key.pem
+            - name: grgate-config
+              mountPath: /etc/grgate/config.yaml
+              subPath: grgate-config.yaml
+            - name: dockersock
+              mountPath: "/var/run/docker.sock"
+      volumes:
+        - name: dockersock
+          hostPath:
+            path: /var/run/docker.sock
+        - name: grgate-github-cert
+          secret:
+            secretName: grgate-github-cert
+        - name: grgate-config
+          configMap:
+            name: grgate-config
+  backoffLimit: 0
