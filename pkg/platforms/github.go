@@ -7,7 +7,6 @@ import (
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v43/github"
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -20,7 +19,6 @@ type GithubConfig struct {
 	AppID          int64
 	InstallationID int64
 	PrivateKeyPath string
-	Token          string
 }
 
 type githubPlatform struct {
@@ -30,33 +28,22 @@ type githubPlatform struct {
 }
 
 // NewGithub returns an instance of platform
-func NewGithub(config *GithubConfig) (Platform, error) {
+func NewGithub(config *GithubConfig) (platform Platform, err error) {
 	ctx := context.Background()
 
-	platform := &githubPlatform{
+	itr, err := ghinstallation.NewKeyFromFile(http.DefaultTransport,
+		config.AppID, config.InstallationID, config.PrivateKeyPath)
+	if err != nil {
+		return
+	}
+
+	platform = &githubPlatform{
 		config:  config,
 		context: ctx,
+		client:  github.NewClient(&http.Client{Transport: itr}),
 	}
 
-	// GitHub private key or token based authentication
-	if config.Token == "" {
-		itr, err := ghinstallation.NewKeyFromFile(http.DefaultTransport,
-			config.AppID, config.InstallationID, config.PrivateKeyPath)
-		if err != nil {
-			return nil, err
-		}
-
-		platform.client = github.NewClient(&http.Client{Transport: itr})
-	} else {
-		ts := oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: config.Token},
-		)
-		tc := oauth2.NewClient(ctx, ts)
-
-		platform.client = github.NewClient(tc)
-	}
-
-	return platform, nil
+	return
 }
 
 // ReadFile retrieve file located at the provided path in a given Github repository
