@@ -102,7 +102,7 @@ Create a GitHub App with the following permissions:
 
 ```bash
 $ export GITHUB_APP_ID=<github app id>
-$ export GITHUB_AUHOR=<github author, usually username[bot]>
+$ export GITHUB_AUTHOR=<github author, usually username[bot]>
 $ export GITHUB_INSTALLATION_ID=<github installation id>
 $ export GITHUB_OWNER=<github repository owner>
 $ export GITHUB_PRIVATE_KEY_PATH=<github private key path>
