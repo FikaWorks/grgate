@@ -9,21 +9,45 @@ on:
   pull_request:
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: set up Go 1.x
-        uses: actions/setup-go@v2
-        with:
-          go-version: ^1.17
-
       - name: checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v3
 
-      - name: download dependencies
-        run: go get -v -t -d ./...
+      - name: install golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.45
+
+      - name: validate
+        run: make validate
+
+  codeql:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: codeql-init
+        uses: github/codeql-action/init@v2
+        with:
+          languages: go
+
+      - name: codeql-analyze
+        uses: github/codeql-action/analyze@v2
+
+  build:
+    runs-on: ubuntu-latest
+    if: "!startsWith(github.ref, 'refs/tags/')"
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: set up Go 1.x
+        uses: actions/setup-go@v3
+        with:
+          go-version: ^1.18
 
       - uses: actions/cache@v2
         with:
@@ -32,43 +56,100 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.45
-
-      - name: codeql-init
-        uses: github/codeql-action/init@v1
-        with:
-          languages: go
-
-      - name: codeql-analyze
-        uses: github/codeql-action/analyze@v1
-
-      - name: validate
-        run: make validate
-
-      - if: "!startsWith(github.ref, 'refs/tags/')"
+      - name: build
         uses: goreleaser/goreleaser-action@v2
         with:
           args: build --rm-dist --snapshot
 
-      - if: startsWith(github.ref, 'refs/tags/')
-        name: goreleaser
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: set up Go 1.x
+        uses: actions/setup-go@v3
+        with:
+          go-version: ^1.18
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: integration
+        run: |
+          echo $GITHUB_PRIVATE_KEY_BASE64 | base64 --decode > ./github-private-key.pem
+          make integration
+        env:
+          GITHUB_APP_ID: ${{ secrets.E2E_GITHUB_APP_ID }}
+          GITHUB_AUTHOR: ${{ secrets.E2E_GITHUB_AUTHOR }}
+          GITHUB_INSTALLATION_ID: ${{ secrets.E2E_GITHUB_INSTALLATION_ID }}
+          GITHUB_OWNER: ${{ secrets.E2E_GITHUB_OWNER }}
+          GITHUB_PRIVATE_KEY_BASE64: ${{ secrets.E2E_GITHUB_PRIVATE_KEY_BASE64 }}
+          GITHUB_PRIVATE_KEY_PATH: ./github-private-key.pem
+          GITLAB_AUTHOR: ${{ secrets.E2E_GITLAB_AUTHOR }}
+          GITLAB_OWNER: ${{ secrets.E2E_GITLAB_OWNER }}
+          GITLAB_TOKEN: ${{ secrets.E2E_GITLAB_TOKEN }}
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: 
+      - lint
+      - codeql
+      - integration
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: build docker
+        run: make build-docker
+
+  release:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: 
+      - codeql
+      - docker
+      - integration
+      - lint
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: set up Go 1.x
+        uses: actions/setup-go@v3
+        with:
+          go-version: ^1.18
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: build docker
+        run: make push-dockerhub
+
+      - name: goreleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
           args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - if: startsWith(github.ref, 'refs/tags/')
-        name: login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - if: startsWith(github.ref, 'refs/tags/')
-        name: build docker
-        run: make push-dockerhub
