@@ -89,5 +89,6 @@ func init() {
 	statusGetCmd.MarkFlagRequired("status")
 
 	flags.StringVar(&statusSetFlags.state, "state", "",
-		"(Github only) commit status state is one of success, in_progress")
+		"(Github only) commit status state is one of action_required, cancelled\n"+
+			", failure, neutral, success, skipped, stale, timed_out")
 }

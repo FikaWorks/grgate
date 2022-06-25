@@ -74,7 +74,8 @@ type Status struct {
 	// Name of the status
 	Name string
 
-	// State is only used by Github checks, must be one of success or in_progress
+	// State is only used by Github checks, must be one of action_required,
+	// cancelled, failure, neutral, success, skipped, stale, timed_out
 	State string
 
 	// Status the commit status:
