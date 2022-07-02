@@ -4,18 +4,23 @@ package utils
 
 import (
 	"testing"
+	"time"
 
 	"github.com/fikaworks/grgate/pkg/config"
 	"github.com/kylelemons/godebug/pretty"
 )
 
 func TestRenderDashboard(t *testing.T) {
+	currentTime := time.Now().UTC().Format(time.UnixDate)
 	data := &DashboardData{
-		Enabled: true,
-		Errors:  []string{},
+		Enabled:           true,
+		Errors:            []string{},
+		LastExecutionTime: currentTime,
 	}
 
-	expected := "GRGate is enabled for this repository."
+	expected := `GRGate is enabled for this repository.
+
+Last time GRGate processed this repository: ` + currentTime
 
 	result, err := RenderDashboard(config.DefaultDashboardTemplate, data)
 	if err != nil {
@@ -27,16 +32,20 @@ func TestRenderDashboard(t *testing.T) {
 }
 
 func TestRenderDashboardError(t *testing.T) {
+	currentTime := time.Now().UTC().Format(time.UnixDate)
 	data := &DashboardData{
-		Enabled: true,
-		Errors:  []string{"error 1", "error 2"},
+		Enabled:           true,
+		Errors:            []string{"error 1", "error 2"},
+		LastExecutionTime: currentTime,
 	}
 
 	expected := `GRGate is enabled for this repository.
 
 Incorrect configuration detected with the following error(s):
 - error 1
-- error 2`
+- error 2
+
+Last time GRGate processed this repository: ` + currentTime
 
 	result, err := RenderDashboard(config.DefaultDashboardTemplate, data)
 	if err != nil {

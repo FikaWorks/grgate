@@ -39,7 +39,9 @@ Incorrect configuration detected with the following error(s):
 {{- range .Errors }}
 - {{ . }}
 {{- end }}
-{{- end }}`
+{{- end }}
+
+Last time GRGate processed this repository: {{ .LastExecutionTime }}`
 
 	// DefaultTagRegexp is the default pattern used to match tags attached to
 	// releases
