@@ -7,8 +7,9 @@ import (
 
 // DashboardData hold issue data used to populate the issue dashboard template
 type DashboardData struct {
-	Errors  []string
-	Enabled bool
+	Errors            []string
+	Enabled           bool
+	LastExecutionTime string
 }
 
 func RenderDashboard(tpl string, data *DashboardData) (output string, err error) {

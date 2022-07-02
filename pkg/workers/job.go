@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -147,8 +148,9 @@ func (j *Job) processDashboard(errorList []string) {
 	body, err := utils.RenderDashboard(
 		j.Config.Dashboard.Template,
 		&utils.DashboardData{
-			Enabled: j.Config.Enabled,
-			Errors:  errorList,
+			Enabled:           j.Config.Enabled,
+			Errors:            errorList,
+			LastExecutionTime: time.Now().UTC().Format(time.UnixDate),
 		},
 	)
 	if err != nil {
