@@ -58,7 +58,7 @@ issues:
       source: ^//go:generate
     - linters:
         - lll
-      source: ^var uriRegexp
+      source: ^var urlRegexp
     - linters:
         - funlen
       path: pkg/workers/job.go

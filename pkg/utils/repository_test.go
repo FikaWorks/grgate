@@ -151,7 +151,7 @@ func TestExtractRepository(t *testing.T) {
 			},
 		}, {
 			input: "https://example.com",
-			error: fmt.Errorf("Cannot parse provided repository uri or owner/name"),
+			error: fmt.Errorf("cannot parse provided repository url or owner/name"),
 		},
 	}
 
