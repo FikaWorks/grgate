@@ -2,7 +2,6 @@ package server
 
 import (
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -22,7 +21,7 @@ var (
 // GitlabHandler handle Gitlab webhook requests
 func (h *WebhookHandler) GitlabHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
-		if _, err := io.Copy(ioutil.Discard, r.Body); err != nil {
+		if _, err := io.Copy(io.Discard, r.Body); err != nil {
 			log.Error().Err(err).Msg("Could discard request body")
 		}
 		if err := r.Body.Close(); err != nil {
@@ -48,7 +47,7 @@ func (h *WebhookHandler) GitlabHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload, err := ioutil.ReadAll(r.Body)
+	payload, err := io.ReadAll(r.Body)
 	if err != nil || len(payload) == 0 {
 		log.Error().Msgf("Error reading request body from event type %s", eventType)
 		return

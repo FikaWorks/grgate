@@ -59,8 +59,10 @@ func (p *gitlabPlatform) ReadFile(owner, repository, path string) (content io.Re
 // ListReleases from a Gitlab repository
 func (p *gitlabPlatform) ListReleases(owner, repository string) (releases []*Release, err error) {
 	opts := &gitlab.ListReleasesOptions{
-		Page:    0,
-		PerPage: gitlabPerPage,
+		ListOptions: gitlab.ListOptions{
+			Page:    0,
+			PerPage: gitlabPerPage,
+		},
 	}
 
 	for {
