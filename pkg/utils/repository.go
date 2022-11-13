@@ -17,7 +17,7 @@ type Repository struct {
 var repositoryRegexp = regexp.MustCompile(`^[a-zA-Z-_0-9.]*/[a-zA-Z-_0-9.]*$`)
 
 // Regexp matching a valid Git URI
-var uriRegexp = regexp.MustCompile(`^((((?P<scheme>https?|ssh):\/\/)?([^@]+@)?(?P<platform>github|gitlab)(.com)?(?P<separator>[\/:])?))?(?P<owner>[a-zA-Z-_0-9.]*)\/(?P<name>[a-zA-Z-_0-9.]*)/?$`)
+var uriRegexp = regexp.MustCompile(`^((((?P<scheme>https?|ssh):\/\/)?([^@]+@)?(?P<platform>github|gitlab)(\.com)?(?P<separator>[\/:])?))?(?P<owner>[a-zA-Z-_0-9.]*)\/(?P<name>[a-zA-Z-_0-9.]*)/?$`)
 
 // Number of named group captured in the above uriRegexp
 const captureGroupNumber = 5
@@ -49,7 +49,7 @@ func ExtractRepository(input string) (repository *Repository, err error) {
 
 	find := uriRegexp.FindStringSubmatch(input)
 	if find == nil {
-		err = fmt.Errorf("Cannot parse provided repository uri or owner/name")
+		err = fmt.Errorf("cannot parse provided repository uri or owner/name")
 		return
 	}
 

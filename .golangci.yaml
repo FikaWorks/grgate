@@ -33,6 +33,10 @@ linters:
     - unused
     - whitespace
 
+linters-settings:
+  nakedret:
+    max-func-lines: 50
+
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
@@ -52,6 +56,9 @@ issues:
     - linters:
         - lll
       source: ^//go:generate
+    - linters:
+        - lll
+      source: ^var uriRegexp
     - linters:
         - funlen
       path: pkg/workers/job.go
