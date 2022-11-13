@@ -19,7 +19,7 @@ var statusGetFlags statusGetFlagsStruct
 
 // statusGetCmd represents the status get command
 var statusGetCmd = &cobra.Command{
-	Use:   "get [OWNER/REPOSITORY]",
+	Use:   "get [URL OR REPO/OWNER]",
 	Short: "Get a status attached to a given commit by name",
 	Long: `Example:
   # get the e2e-happy-flow status associated to a given commit
@@ -30,10 +30,10 @@ var statusGetCmd = &cobra.Command{
 		if len(args) < 1 {
 			return errors.New("requires at least one arg")
 		}
-		if utils.IsValidRepositoryName(args[0]) {
-			return nil
+		if _, err := utils.ExtractRepository(args[0]); err != nil {
+			return err
 		}
-		return fmt.Errorf("invalid repository name specified: %s", args[0])
+		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		log.Info().Msgf("Retrieving commit status for commit %s in repository %s",
@@ -44,9 +44,13 @@ var statusGetCmd = &cobra.Command{
 			return
 		}
 
-		status, err := platform.GetStatus(utils.GetRepositoryOrganization(args[0]),
-			utils.GetRepositoryName(args[0]), statusGetFlags.commitSha,
-			statusGetFlags.name)
+		repository, err := utils.ExtractRepository(args[0])
+		if err != nil {
+			return err
+		}
+
+		status, err := platform.GetStatus(repository.Owner, repository.Name,
+			statusGetFlags.commitSha, statusGetFlags.name)
 		if err != nil {
 			return
 		}

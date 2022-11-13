@@ -24,6 +24,10 @@ const (
 	// shutdownTimeout is the number of seconds to wait before shutting
 	// down the server
 	shutdownTimeout time.Duration = 5 * time.Second
+
+	// requestTimeout is the number of seconds to wait before dropping the
+	// connection
+	requestTimeout time.Duration = 3 * time.Second
 )
 
 // Config hold configuration to run a server
@@ -61,8 +65,9 @@ func NewServer(config *Config) *Server {
 	r.HandleFunc("/gitlab/webhook", webhook.GitlabHandler).Methods("POST")
 
 	srv := &http.Server{
-		Addr:    config.ListenAddr,
-		Handler: c.Then(PromRequestHandler(r)),
+		Addr:              config.ListenAddr,
+		Handler:           c.Then(PromRequestHandler(r)),
+		ReadHeaderTimeout: requestTimeout,
 	}
 
 	return &Server{
@@ -118,7 +123,13 @@ func (s *Server) serveProbe() {
 	log.Info().
 		Msgf("Probe server running at %s", s.Config.ProbeAddr)
 
-	err := http.ListenAndServe(s.Config.ProbeAddr, healthcheck.NewHandler())
+	server := &http.Server{
+		Addr:              s.Config.ProbeAddr,
+		Handler:           healthcheck.NewHandler(),
+		ReadHeaderTimeout: requestTimeout,
+	}
+
+	err := server.ListenAndServe()
 	if err != nil {
 		log.Error().Err(err).Msg("Starting probe listener failed")
 	}
@@ -130,7 +141,12 @@ func (s *Server) serveMetrics() {
 
 	http.Handle("/metrics", promhttp.Handler())
 
-	err := http.ListenAndServe(s.Config.MetricsAddr, nil)
+	server := &http.Server{
+		Addr:              s.Config.MetricsAddr,
+		ReadHeaderTimeout: requestTimeout,
+	}
+
+	err := server.ListenAndServe()
 	if err != nil {
 		log.Error().Err(err).Msg("Starting Prometheus listener failed")
 	}

@@ -13,6 +13,7 @@ const (
 )
 
 // Platform interface Github and Gitlab
+//
 //go:generate go run github.com/golang/mock/mockgen -destination mocks/platforms_mock.go -package mock_platforms github.com/fikaworks/grgate/pkg/platforms Platform
 type Platform interface {
 	CheckAllStatusSucceeded(string, string, string, []string) (bool, error)

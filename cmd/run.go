@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -21,7 +20,7 @@ var runCmdFlags runCmdFlagsStruct
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
-	Use:   "run [OWNER/REPOSITORY]",
+	Use:   "run [URL OR REPO/OWNER]",
 	Short: "Run GRGate against a repository",
 	Long: `The run command list all the draft/unpublished releases from a given
 repository that match the provided tag. From this list, if all the status check
@@ -32,20 +31,23 @@ Example:
   # run against the FikaWorks/my-repo repository, publish draft release which
   # with tag matching a stable semver tag (ie: v1.2.3) and both statuses
   # e2e-happyflow and e2e-useraccountflow succeeded:
-  grgate run FikaWorks/my-repo --tag-regexp "^v[0-9]+\.[0-9]+\.[0-9]+$" \
+  grgate run github.com/FikaWorks/my-repo \
+    --tag-regexp "^v[0-9]+\.[0-9]+\.[0-9]+$" \
     -s e2e-happyflow -s e2e-useraccountflow`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires at least one arg")
 		}
-		if utils.IsValidRepositoryName(args[0]) {
-			return nil
+		if _, err := utils.ExtractRepository(args[0]); err != nil {
+			return err
 		}
-		return fmt.Errorf("invalid repository name specified: %s", args[0])
+		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		owner := utils.GetRepositoryOrganization(args[0])
-		repository := utils.GetRepositoryName(args[0])
+		repository, err := utils.ExtractRepository(args[0])
+		if err != nil {
+			return err
+		}
 
 		if runCmdFlags.dryRun {
 			log.Info().Msg("Executing command with dry-run mode enabled")
@@ -56,7 +58,7 @@ Example:
 			return
 		}
 
-		job, err := workers.NewJob(platform, owner, repository)
+		job, err := workers.NewJob(platform, repository.Owner, repository.Name)
 		if err != nil {
 			return err
 		}

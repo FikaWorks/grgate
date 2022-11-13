@@ -3,7 +3,6 @@
 package config
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -47,7 +46,7 @@ func TestGlobalConfig(t *testing.T) {
 				t.Errorf("Error not expected: %#v", err)
 			}
 
-			file, err := ioutil.TempFile(currentDir, "test-config.*.yaml")
+			file, err := os.CreateTemp(currentDir, "test-config.*.yaml")
 			if err != nil {
 				t.Errorf("Error not expected: %#v", err)
 			}

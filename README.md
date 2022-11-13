@@ -12,6 +12,15 @@ near future.
 
 ![grgate workflow](https://github.com/FikaWorks/grgate/actions/workflows/main.yml/badge.svg?branch=main)
 
+## Project status
+
+[![Build Status](https://github.com/fikaworks/grgate/workflows/build/badge.svg)](https://github.com/fikaworks/grgate/actions?query=workflows%3ACbuild)
+[![GoReport](https://goreportcard.com/badge/github.com/fikaworks/grgate)](https://goreportcard.com/report/github.com/fikaworks/grgate)
+[![GoDoc](https://pkg.go.dev/badge/github.com/fikaworks/grgate)](https://pkg.go.dev/github.com/fikaworks/grgate)
+[![Docs](https://readthedocs.org/projects/docs/badge/?version=latest)](https://securego.io/)
+[![Downloads](https://img.shields.io/github/downloads/fikaworks/grgate/total.svg)](https://github.com/fikaworks/grgate/releases)
+[![Docker Pulls](https://img.shields.io/docker/pulls/fikaworks/grgate.svg)](https://hub.docker.com/r/fikaworks/grgate/tags)
+
 ## Getting started
 
 For instructions on how to get started, concepts and config reference, please
