@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -18,19 +17,20 @@ var statusListFlags statusListFlagsStruct
 
 // commitStatusListCmd represents the status list command
 var statusListCmd = &cobra.Command{
-	Use:   "list [OWNER/REPOSITORY]",
+	Use:   "list [URL OR REPO/OWNER]",
 	Short: "List statuses attached to a given commit",
 	Long: `Example:
   # list statuses associated to a given commit
-  grgate status list my-org/my-repo --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e`,
+  grgate status list my-org/my-repo \
+    --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires at least one arg")
 		}
-		if utils.IsValidRepositoryName(args[0]) {
-			return nil
+		if _, err := utils.ExtractRepository(args[0]); err != nil {
+			return err
 		}
-		return fmt.Errorf("invalid repository name specified: %s", args[0])
+		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		log.Info().Msgf("Listing statuses for commit %s in repository %s",
@@ -41,8 +41,13 @@ var statusListCmd = &cobra.Command{
 			return
 		}
 
-		statusList, err := platform.ListStatuses(utils.GetRepositoryOrganization(
-			args[0]), utils.GetRepositoryName(args[0]), statusListFlags.commitSha)
+		repository, err := utils.ExtractRepository(args[0])
+		if err != nil {
+			return err
+		}
+
+		statusList, err := platform.ListStatuses(repository.Owner,
+			repository.Name, statusListFlags.commitSha)
 		if err != nil {
 			return
 		}

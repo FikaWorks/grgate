@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -22,7 +21,7 @@ var statusSetFlags statusSetFlagsStruct
 
 // statusSetCmd represents the status set command
 var statusSetCmd = &cobra.Command{
-	Use:   "set [OWNER/REPOSITORY]",
+	Use:   "set [URL OR REPO/OWNER]",
 	Short: "Set a status to a given commit",
 	Long: `Examples:
   # set the e2e-happy-flow status to completed (github)
@@ -31,17 +30,17 @@ var statusSetCmd = &cobra.Command{
     --name e2e-happy-flow --status completed --state success
 
   # set the e2e-happy-flow status to success (gitlab)
-  grgate status set my-org/my-repo \
+  grgate status set gitlab.com/my-org/my-repo \
     --commit 36a2dabd4cc732ccab2657392d4a1f8db2f9e19e \
     --name e2e-happy-flow --status success`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires at least one arg")
 		}
-		if utils.IsValidRepositoryName(args[0]) {
-			return nil
+		if _, err := utils.ExtractRepository(args[0]); err != nil {
+			return err
 		}
-		return fmt.Errorf("invalid repository name specified: %s", args[0])
+		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		log.Info().Msgf("Setting commit %s with status %s = %s and state = %s",
@@ -53,8 +52,13 @@ var statusSetCmd = &cobra.Command{
 			return
 		}
 
-		err = platform.CreateStatus(utils.GetRepositoryOrganization(args[0]),
-			utils.GetRepositoryName(args[0]), &platforms.Status{
+		repository, err := utils.ExtractRepository(args[0])
+		if err != nil {
+			return err
+		}
+
+		err = platform.CreateStatus(repository.Owner, repository.Name,
+			&platforms.Status{
 				Name:      statusSetFlags.name,
 				CommitSha: statusSetFlags.commitSha,
 				Status:    statusSetFlags.status,
