@@ -8,11 +8,11 @@ RUN apk add docker curl bash && \
   kubectl version --client
 
 # install GRGate
-RUN curl -LO https://github.com/FikaWorks/grgate/releases/download/v0.4.0/grgate_0.4.0_linux_amd64.tar.gz && \
-  tar -xvf grgate_0.4.0_linux_amd64.tar.gz && \
+RUN curl -LO https://github.com/FikaWorks/grgate/releases/download/v0.6.2/grgate_0.6.2_linux_amd64.tar.gz && \
+  tar -xvf grgate_0.6.2_linux_amd64.tar.gz && \
   chmod +x ./grgate && \
   mv ./grgate /usr/local/bin/grgate && \
-  rm -rf grgate_0.4.0_linux_amd64.tar.gz && \
+  rm -rf grgate_0.6.2_linux_amd64.tar.gz && \
   grgate version
 
 COPY e2e-runner.sh /e2e-runner.sh

@@ -2,7 +2,7 @@ export DOCKER_BUILDKIT=1
 
 GRGATE_COMMITSHA=$(shell git rev-parse --short HEAD)
 GRGATE_VERSION=$(shell git describe --contains $(GRGATE_COMMITSHA))
-DOCKER_IMAGE=fikaworks/grgate
+DOCKER_IMAGE=ghcr.io/fikaworks/grgate
 
 .PHONY: \
 	all \
