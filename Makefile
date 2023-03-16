@@ -14,7 +14,7 @@ DOCKER_IMAGE=ghcr.io/fikaworks/grgate
 	lint \
 	lint-fix \
 	mocks \
-	push-dockerhub \
+	push-docker \
 	test \
 	validate
 
@@ -35,7 +35,7 @@ build-docker:
 		--build-arg GRGATE_VERSION=$(GRGATE_VERSION) \
 		-t $(DOCKER_IMAGE) .
 
-push-dockerhub: build-docker
+push-docker: build-docker
 	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(GRGATE_VERSION)
 	docker push $(DOCKER_IMAGE)
 	docker push $(DOCKER_IMAGE):$(GRGATE_VERSION)
