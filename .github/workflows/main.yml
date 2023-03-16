@@ -100,6 +100,9 @@ jobs:
       - lint
       - codeql
       - integration
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -122,6 +125,9 @@ jobs:
       - docker
       - integration
       - lint
+    permissions:
+      contents: write
+      packages: write
     steps:
       - name: checkout
         uses: actions/checkout@v3
