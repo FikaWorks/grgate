@@ -9,6 +9,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
   -a -installsuffix cgo -o grgate .
 
 FROM scratch
+LABEL org.opencontainers.image.source https://github.com/FikaWorks/grgate
 COPY --from=build /go/src/app/grgate /bin/grgate
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 EXPOSE 8080 8086 9101

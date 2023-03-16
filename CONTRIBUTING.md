@@ -43,7 +43,7 @@ $ ./grgate --help
 
 ```bash
 $ make build-docker
-$ docker run --ti -p 8080:8080 -v $PWD/config.yaml:/etc/grgate/config.yaml fikaworks/grgate
+$ docker run --ti -p 8080:8080 -v $PWD/config.yaml:/etc/grgate/config.yaml ghcr.io/fikaworks/grgate
 ```
 
 ### Lint
