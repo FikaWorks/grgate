@@ -152,7 +152,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: build docker
-        run: make push-dockerhub
+        run: make push-docker
 
       - name: goreleaser
         uses: goreleaser/goreleaser-action@v2
