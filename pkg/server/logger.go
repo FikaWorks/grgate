@@ -1,17 +1,23 @@
 package server
 
 import (
-	"net/http"
-	"time"
-
-	"github.com/rs/zerolog/hlog"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/rs/zerolog/log"
 )
 
-func Logger(r *http.Request, status, size int, dur time.Duration) {
-	hlog.FromRequest(r).Info().
-		Str("host", r.Host).
-		Int("status", status).
-		Int("size", size).
-		Dur("duration_ms", dur).
-		Msg("request")
+func Logger(_ echo.Context, v middleware.RequestLoggerValues) error {
+	if v.Error == nil {
+		log.Info().
+			Str("URI", v.URI).
+			Int("status", v.Status).
+			Msg("request")
+	} else {
+		log.Error().
+			Err(v.Error).
+			Str("URI", v.URI).
+			Int("status", v.Status).
+			Msg("request error")
+	}
+	return nil
 }
