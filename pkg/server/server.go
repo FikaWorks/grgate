@@ -8,12 +8,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/heptiolabs/healthcheck"
-	"github.com/justinas/alice"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 
 	"github.com/fikaworks/grgate/pkg/platforms"
@@ -25,7 +22,7 @@ const (
 	// down the server
 	shutdownTimeout time.Duration = 5 * time.Second
 
-	// requestTimeout is the number of seconds to wait before dropping the
+	// requestTimeout is the number of seconds to wait before dropping
 	// connection
 	requestTimeout time.Duration = 3 * time.Second
 )
@@ -43,17 +40,37 @@ type Config struct {
 
 // Server hold a server instance
 type Server struct {
-	CancelWorker chan struct{}
-	Config       *Config
-	Srv          *http.Server
-	WorkerPool   *workers.WorkerPool
+	CancelWorker  chan struct{}
+	Config        *Config
+	MainServer    *http.Server
+	MetricsServer *http.Server
+	ProbeServer   *http.Server
+	WorkerPool    *workers.WorkerPool
 }
 
 // NewServer returns an instance of server
 func NewServer(config *Config) *Server {
-	// router
-	r := mux.NewRouter()
-	c := alice.New(hlog.NewHandler(config.Logger), hlog.AccessHandler(Logger))
+	// Probe server
+	probeServer := NewProbeServer(config.ProbeAddr)
+
+	// Prometheus metrics middleware
+	metricsServer, promHandlerFunc := NewMetricsServer(config.MetricsAddr)
+
+	// Main server
+	e := echo.New()
+	e.HideBanner = true
+
+	// Prometheus metrics
+	e.Use(promHandlerFunc)
+
+	// logging
+	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogURI:        true,
+		LogStatus:     true,
+		LogError:      true,
+		HandleError:   true,
+		LogValuesFunc: Logger,
+	}))
 
 	cancelWorker := make(chan struct{})
 	workerPool := workers.NewWorkerPool(config.Workers, cancelWorker)
@@ -61,20 +78,22 @@ func NewServer(config *Config) *Server {
 	webhook := NewWebhookHandler(config.Platform, config.WebhookSecret,
 		workerPool.JobQueue)
 
-	r.HandleFunc("/github/webhook", webhook.GithubHandler).Methods("POST")
-	r.HandleFunc("/gitlab/webhook", webhook.GitlabHandler).Methods("POST")
+	e.POST("/github/webhook", webhook.GithubHandler)
+	e.POST("/gitlab/webhook", webhook.GitlabHandler)
 
-	srv := &http.Server{
+	mainServer := &http.Server{
 		Addr:              config.ListenAddr,
-		Handler:           c.Then(PromRequestHandler(r)),
+		Handler:           e,
 		ReadHeaderTimeout: requestTimeout,
 	}
 
 	return &Server{
-		Config:       config,
-		Srv:          srv,
-		WorkerPool:   workerPool,
-		CancelWorker: cancelWorker,
+		Config:        config,
+		MainServer:    mainServer,
+		MetricsServer: metricsServer,
+		ProbeServer:   probeServer,
+		WorkerPool:    workerPool,
+		CancelWorker:  cancelWorker,
 	}
 }
 
@@ -104,7 +123,7 @@ func (s *Server) Start() {
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
-	if err := s.Srv.Shutdown(ctx); err != nil {
+	if err := s.MainServer.Shutdown(ctx); err != nil {
 		log.Error().Err(err)
 	}
 }
@@ -113,7 +132,7 @@ func (s *Server) serveHTTP() {
 	log.Info().
 		Msgf("Server started at %s", s.Config.ListenAddr)
 
-	err := s.Srv.ListenAndServe()
+	err := s.MainServer.ListenAndServe()
 	if err != http.ErrServerClosed {
 		log.Fatal().Err(err).Msg("Failed starting HTTP server")
 	}
@@ -123,13 +142,7 @@ func (s *Server) serveProbe() {
 	log.Info().
 		Msgf("Probe server running at %s", s.Config.ProbeAddr)
 
-	server := &http.Server{
-		Addr:              s.Config.ProbeAddr,
-		Handler:           healthcheck.NewHandler(),
-		ReadHeaderTimeout: requestTimeout,
-	}
-
-	err := server.ListenAndServe()
+	err := s.ProbeServer.ListenAndServe()
 	if err != nil {
 		log.Error().Err(err).Msg("Starting probe listener failed")
 	}
@@ -139,14 +152,7 @@ func (s *Server) serveMetrics() {
 	log.Info().
 		Msgf("Serving Prometheus metrics on port %s", s.Config.MetricsAddr)
 
-	http.Handle("/metrics", promhttp.Handler())
-
-	server := &http.Server{
-		Addr:              s.Config.MetricsAddr,
-		ReadHeaderTimeout: requestTimeout,
-	}
-
-	err := server.ListenAndServe()
+	err := s.MetricsServer.ListenAndServe()
 	if err != nil {
 		log.Error().Err(err).Msg("Starting Prometheus listener failed")
 	}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/xanzy/go-gitlab"
 
@@ -19,7 +20,8 @@ var (
 )
 
 // GitlabHandler handle Gitlab webhook requests
-func (h *WebhookHandler) GitlabHandler(w http.ResponseWriter, r *http.Request) {
+func (h *WebhookHandler) GitlabHandler(c echo.Context) error {
+	r := c.Request()
 	defer func() {
 		if _, err := io.Copy(io.Discard, r.Body); err != nil {
 			log.Error().Err(err).Msg("Could discard request body")
@@ -32,32 +34,32 @@ func (h *WebhookHandler) GitlabHandler(w http.ResponseWriter, r *http.Request) {
 	signature := r.Header.Get("X-Gitlab-Token")
 	if signature != h.WebhookSecret {
 		log.Error().Msg("Token validation failed")
-		return
+		return c.NoContent(http.StatusForbidden)
 	}
 
 	event := r.Header.Get("X-Gitlab-Event")
 	if strings.TrimSpace(event) == "" {
 		log.Error().Msg("Request is missing the X-Gitlab-Event header")
-		return
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	eventType := gitlab.EventType(event)
 	if !isGitlabEventSubscribed(eventType, gitlabEvents) {
 		log.Error().Msgf("Event type %s is not supported", eventType)
-		return
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	payload, err := io.ReadAll(r.Body)
 	if err != nil || len(payload) == 0 {
 		log.Error().Msgf("Error reading request body from event type %s", eventType)
-		return
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	parsedBody, err := gitlab.ParseWebhook(eventType, payload)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error parsing request body from event type %s",
 			eventType)
-		return
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	log.Debug().Msgf("Received webhook event %s", event)
@@ -70,6 +72,8 @@ func (h *WebhookHandler) GitlabHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		log.Info().Msgf("Event type %s is not supported", eventType)
 	}
+
+	return c.NoContent(http.StatusOK)
 }
 
 func (h *WebhookHandler) processGitlabReleaseEvent(event gitlab.ReleaseEvent) {

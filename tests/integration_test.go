@@ -4,7 +4,6 @@ package tests
 
 import (
 	"fmt"
-	"math/rand"
 	"testing"
 	"time"
 
@@ -32,8 +31,6 @@ func runTests(t *testing.T, platform platforms.Platform, owner, author string) {
 }
 
 func setup(platform platforms.Platform, owner string) (repository string, err error) {
-	rand.Seed(time.Now().UnixNano())
-
 	repository = generateRandomRepositoryName(repositoryPrefix)
 
 	fmt.Printf("Creating repository %s/%s\n", owner, repository)

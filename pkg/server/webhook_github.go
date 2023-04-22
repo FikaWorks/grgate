@@ -4,23 +4,22 @@ import (
 	"net/http"
 
 	"github.com/google/go-github/v43/github"
+	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 )
 
-// GithubHandler handle Github webhook requests
-func (h *WebhookHandler) GithubHandler(w http.ResponseWriter, r *http.Request) {
+func (h *WebhookHandler) GithubHandler(c echo.Context) error {
+	r := c.Request()
 	payload, err := github.ValidatePayload(r, []byte(h.WebhookSecret))
 	if err != nil {
 		log.Error().Err(err).Msg("Error validating request body")
-		return
+		return c.NoContent(http.StatusForbidden)
 	}
-
-	defer r.Body.Close()
 
 	event, err := github.ParseWebHook(github.WebHookType(r), payload)
 	if err != nil {
 		log.Error().Err(err).Msg("Could not parse webhook")
-		return
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	switch event := event.(type) {
@@ -35,6 +34,8 @@ func (h *WebhookHandler) GithubHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		log.Info().Msgf("Event type %s is not supported", github.WebHookType(r))
 	}
+
+	return c.NoContent(http.StatusOK)
 }
 
 func (h *WebhookHandler) processGithubStatusEvent(event *github.StatusEvent) {
