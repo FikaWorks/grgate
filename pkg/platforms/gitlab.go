@@ -261,7 +261,7 @@ func (p *gitlabPlatform) CreateRelease(owner, repository string, release *Releas
 
 // CreateRepository create a repository
 // This function is only called by integration tests
-func (p *gitlabPlatform) CreateRepository(owner, repository, visibility string) (err error) {
+func (p *gitlabPlatform) CreateRepository(_, repository, visibility string) (err error) {
 	opts := &gitlab.CreateProjectOptions{
 		Name:       gitlab.String(repository),
 		Visibility: gitlab.Visibility(gitlab.VisibilityValue(visibility)),
