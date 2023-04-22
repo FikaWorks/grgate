@@ -71,7 +71,7 @@ func ExtractRepository(input string) (repository *Repository, err error) {
 	}
 
 	repository = &Repository{
-		Name:     strings.TrimRight(result["name"], ".git"),
+		Name:     strings.TrimSuffix(result["name"], ".git"),
 		Owner:    result["owner"],
 		Platform: result["platform"],
 		Scheme:   result["scheme"],
